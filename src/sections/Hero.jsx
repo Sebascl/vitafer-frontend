@@ -13,50 +13,56 @@ const Hero = () => {
       { y: 50, opacity: 0 },
       { y: 0, opacity: 1, stagger: 0.2, duration: 1, ease: "power2.inOut" }
     );
+    gsap.fromTo(
+      ".hero-button",
+      { opacity: 0, y: 20 },
+      { opacity: 1, y: 0, duration: 1, delay: 1.5, ease: "power2.inOut" }
+    );
   });
 
   return (
-    <section id="hero" className="relative overflow-hidden">
+    <section id="hero" className="relative overflow-hidden bg-black">
       <div className="absolute top-0 left-0 z-10">
-        <img src="/images/bg.png" alt="" />
+        <img
+          src="/images/bg.png"
+          alt="Vitafer background"
+          className="filter sepia-100 saturate-300 brightness-150 mix-blend-color-dodge"
+        />
       </div>
-
-      <div className="hero-layout">
-        {}
-        <header className="flex flex-col justify-center md:w-full w-screen md:px-20 px-5">
+      <div className="hero-layout flex flex-col md:flex-row items-center justify-between min-h-screen">
+        <header className="flex flex-col justify-center md:w-full w-full md:px-20 px-5 py-10">
           <div className="flex flex-col gap-7">
             <div className="hero-text">
-              <h1>
-                Shaping
+              <h1 className="text-yellow-400 md:text-6xl text-4xl font-bold leading-tight">
+                Despierta tus sentidos
+              </h1>
+              <h1 className="text-yellow-400 md:text-6xl text-4xl font-bold leading-tight">
+                con el poder de
+              </h1>
+              <h1 className="text-white md:text-6xl text-4xl font-bold leading-tight">
+                Vitafer
                 <span className="slide">
                   <span className="wrapper">
                     {words.map((word, index) => (
                       <span
                         key={index}
-                        className="flex items-center md:gap-3 gap-1 pb-2"
+                        className="flex items-center md:gap-3 gap-1 pb-2 text-yellow-300"
                       >
-                        <img
-                          src={word.imgPath}
-                          alt="person"
-                          className="xl:size-12 md:size-10 size-7 md:p-2 p-1 rounded-full bg-white-50"
-                        />
                         <span>{word.text}</span>
                       </span>
                     ))}
                   </span>
                 </span>
               </h1>
-              <h1>into Real Projects</h1>
-              <h1>that Deliver Results</h1>
             </div>
 
-            <p className="text-white-50 md:text-xl relative z-10 pointer-events-none">
-              Hi, I’m Adrian, a developer based in Croatia with a passion for
-              code.
+            <p className="text-gray-200 md:text-2xl text-xl relative z-10 max-w-lg">
+              Más energía, más deseo, más confianza. Vitafer es tu aliado
+              natural para rendir al máximo cuando más lo necesitas.
             </p>
 
             <Button
-              text="See My Work"
+              text="¡Compra Ahora!"
               className="md:w-80 md:h-16 w-60 h-12"
               id="counter"
             />
@@ -64,7 +70,7 @@ const Hero = () => {
         </header>
 
         {/* RIGHT: 3D Model or Visual */}
-        <figure>
+        <figure className="md:w-1/2 w-full h-full">
           <div className="hero-3d-layout">
             <HeroExperience />
           </div>

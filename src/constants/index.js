@@ -1,38 +1,25 @@
 const navLinks = [
-  {
-    name: "Work",
-    link: "#work",
-  },
-  {
-    name: "Experience",
-    link: "#experience",
-  },
-  {
-    name: "Skills",
-    link: "#skills",
-  },
-  {
-    name: "Testimonials",
-    link: "#testimonials",
-  },
+  { name: "Inicio", link: "#work" },
+  { name: "Beneficios", link: "#experience" },
+  { name: "Precios", link: "#skills" },
+  { name: "Testimonios", link: "#testimonials" },
+  { name: "Contacto", link: "#contact" },
 ];
 
 const words = [
-  { text: "Ideas", imgPath: "/images/ideas.svg" },
-  { text: "Concepts", imgPath: "/images/concepts.svg" },
-  { text: "Designs", imgPath: "/images/designs.svg" },
-  { text: "Code", imgPath: "/images/code.svg" },
-  { text: "Ideas", imgPath: "/images/ideas.svg" },
-  { text: "Concepts", imgPath: "/images/concepts.svg" },
-  { text: "Designs", imgPath: "/images/designs.svg" },
-  { text: "Code", imgPath: "/images/code.svg" },
+  { text: "placer 🔥" },
+  { text: "pasión 💋" },
+  { text: "resistencia 💪" },
+  { text: "deseo 🍑" },
+  { text: "intensidad 💦" },
+  { text: "conexión ❤️" },
 ];
 
 const counterItems = [
-  { value: 15, suffix: "+", label: "Years of Experience" },
-  { value: 200, suffix: "+", label: "Satisfied Clients" },
-  { value: 108, suffix: "+", label: "Completed Projects" },
-  { value: 90, suffix: "%", label: "Client Retention Rate" },
+  { value: 4, suffix: "+", label: "Años de Experiencia" },
+  { value: 200000, suffix: "+", label: "Clientes Satisfechos" },
+  { value: 10000, suffix: "+", label: "Testimonios Positivos" },
+  { value: 100, suffix: "%", label: "Ingredientes Naturales" },
 ];
 
 const logoIconsList = [

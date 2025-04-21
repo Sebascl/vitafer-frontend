@@ -10,23 +10,41 @@ const Particles = ({ count = 200 }) => {
       temp.push({
         position: [
           (Math.random() - 0.5) * 10,
-          Math.random() * 10 + 5, // higher starting point
+          Math.random() * 10 + 5,
           (Math.random() - 0.5) * 10,
         ],
-        speed: 0.005 + Math.random() * 0.001,
+        speed: 0.003 + Math.random() * 0.002, // más lento y suave
+        offset: Math.random() * 100, // para variar la sinusoide
       });
     }
     return temp;
   }, [count]);
 
-  useFrame(() => {
+  useFrame(({ clock }) => {
+    const time = clock.getElapsedTime();
     const positions = mesh.current.geometry.attributes.position.array;
+  
     for (let i = 0; i < count; i++) {
-      let y = positions[i * 3 + 1];
-      y -= particles[i].speed;
-      if (y < -2) y = Math.random() * 10 + 5;
+      // Movimiento suave con caída
+      let p = particles[i];
+  
+      // Actualizar la Y con caída
+      p.position[1] -= p.speed;
+      if (p.position[1] < -2) {
+        p.position[1] = Math.random() * 10 + 5;
+      }
+  
+      // Oscilar lateralmente
+      const x = p.position[0] + Math.sin(time * 0.5 + i) * 0.05;
+      const y = p.position[1];
+      const z = p.position[2] + Math.cos(time * 0.5 + i) * 0.05;
+  
+      // Aplicar a los atributos
+      positions[i * 3] = x;
       positions[i * 3 + 1] = y;
+      positions[i * 3 + 2] = z;
     }
+  
     mesh.current.geometry.attributes.position.needsUpdate = true;
   });
 
@@ -48,11 +66,12 @@ const Particles = ({ count = 200 }) => {
         />
       </bufferGeometry>
       <pointsMaterial
-        color="#ffffff"
-        size={0.05}
+        size={0.08}
         transparent
-        opacity={0.9}
+        opacity={0.8}
         depthWrite={false}
+        vertexColors={false}
+        color="#ff69b4" // sensual rosado
       />
     </points>
   );

@@ -3,53 +3,56 @@ import { useState, useEffect } from "react";
 import { navLinks } from "../constants";
 
 const NavBar = () => {
-  // track if the user has scrolled down the page
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
-    // create an event listener for when the user scrolls
     const handleScroll = () => {
-      // check if the user has scrolled down at least 10px
-      // if so, set the state to true
-      const isScrolled = window.scrollY > 10;
-      setScrolled(isScrolled);
+      setScrolled(window.scrollY > 10);
     };
 
-    // add the event listener to the window
     window.addEventListener("scroll", handleScroll);
-
-    // cleanup the event listener when the component is unmounted
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   return (
-    <header className={`navbar ${scrolled ? "scrolled" : "not-scrolled"}`}>
-      <div className="inner">
-        <a href="#hero" className="logo">
-          <img rel="icon" type="image/svg+xml" href="../../public/images/vitafer-logo.png"></img>
+    <header
+      className={`fixed top-0 w-full z-50 transition-all duration-300 ${
+        scrolled ? "bg-black shadow-lg" : "bg-transparent"
+      }`}
+    >
+      <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+        {/* Logo */}
+        <a href="#hero" className="flex items-center">
+          <img
+            src="/images/vitafer-logo.png"
+            alt="Vitafer Logo"
+            className="h-20 w-auto"
+          />
         </a>
 
-        <nav className="desktop">
-          <ul>
-            {navLinks.map(({ link, name }) => (
-              <li key={name} className="group">
-                <a href={link}>
-                  <span>{name}</span>
-                  <span className="underline" />
-                </a>
-              </li>
-            ))}
-          </ul>
+        {/* Links */}
+        <nav className="hidden md:flex space-x-8">
+          {navLinks.map(({ name, link }) => (
+            <a
+              key={name}
+              href={link}
+              className="text-yellow-400 hover:text-yellow-300 font-semibold transition-colors"
+            >
+              {name}
+            </a>
+          ))}
         </nav>
 
-        <a href="#contact" className="contact-btn group">
-          <div className="inner">
-            <span>Contact me</span>
-          </div>
+        {/* CTA Button */}
+        <a
+          href="#contact"
+          className="hidden md:inline-block bg-yellow-400 text-black px-6 py-3 rounded-full hover:bg-yellow-300 transition-all duration-300 shadow-lg hover:shadow-yellow-500/50 transform hover:scale-105"
+        >
+          Siente el poder de Vitafer
         </a>
       </div>
     </header>
   );
-}
+};
 
 export default NavBar;

@@ -2,40 +2,41 @@ import * as THREE from "three";
 
 const HeroLights = () => (
   <>
-    {/* lamp's light */}
+    {/* Soft warm spot light, more sensual feel */}
     <spotLight
       position={[2, 5, 6]}
       angle={0.15}
-      penumbra={0.2}
-      intensity={100}
-      color="white"
+      penumbra={0.3}
+      intensity={80}
+      color="#FFB84D" // Warm golden light
     />
-    {/* bluish overhead lamp */}
+    {/* Soft pinkish overhead light */}
     <spotLight
       position={[4, 5, 4]}
       angle={0.3}
       penumbra={0.5}
-      intensity={40}
-      color="#4cc9f0"
+      intensity={50}
+      color="#FF66B2" // Romantic pinkish hue
     />
-    {/* purplish side fill */}
+    {/* Purple side fill for moody atmosphere */}
     <spotLight
       position={[-3, 5, 5]}
       angle={0.4}
       penumbra={1}
-      intensity={60}
-      color="#9d4edd"
+      intensity={40}
+      color="#9D4EDD" // Deep purple for a sensual, seductive vibe
     />
-    {/* area light for soft moody fill */}
+    {/* Area light with a soft lavender glow */}
     <primitive
-      object={new THREE.RectAreaLight("#a259ff", 8, 3, 2)}
+      object={new THREE.RectAreaLight("#D5A6EB", 8, 3, 2)} // Lavender color for a gentle soft touch
       position={[1, 3, 4]}
       rotation={[-Math.PI / 4, Math.PI / 4, 0]}
-      intensity={15}
+      intensity={20}
     />
-    {/* subtle point light for atmospheric tone */}
-    <pointLight position={[0, 1, 0]} intensity={10} color="#7209b7" />
-    <pointLight position={[1, 2, -2]} intensity={10} color="#0d00a4" />
+    {/* Subtle point light with a deep sensual purple tone */}
+    <pointLight position={[0, 1, 0]} intensity={8} color="#7209B7" />
+    {/* Another soft point light with a deep blue tone for atmosphere */}
+    <pointLight position={[1, 2, -2]} intensity={8} color="#0D00A4" />
   </>
 );
 
