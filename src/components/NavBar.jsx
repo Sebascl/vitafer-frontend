@@ -1,6 +1,18 @@
 import { useState, useEffect } from "react";
-
 import { navLinks } from "../constants";
+
+// Función para manejar el clic en los enlaces
+const handleLinkClick = (e, link) => {
+  e.preventDefault(); // Previene el comportamiento por defecto
+
+  const targetElement = document.querySelector(link);
+  const offsetTop = targetElement.offsetTop - 120; // Ajusta 80px según la altura de tu navbar
+
+  window.scrollTo({
+    top: offsetTop,
+    behavior: "smooth",
+  });
+};
 
 const NavBar = () => {
   const [scrolled, setScrolled] = useState(false);
@@ -37,6 +49,7 @@ const NavBar = () => {
               key={name}
               href={link}
               className="text-yellow-400 hover:text-yellow-300 font-semibold transition-colors"
+              onClick={(e) => handleLinkClick(e, link)} // Llamar a handleLinkClick con el enlace correspondiente
             >
               {name}
             </a>

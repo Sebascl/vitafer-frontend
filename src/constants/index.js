@@ -101,34 +101,34 @@ const techStackImgs = [
 
 const techStackIcons = [
   {
-    name: "React Developer",
-    modelPath: "/models/react_logo-transformed.glb",
-    scale: 1,
+    name: "💥 Vitafer-L 500mL",
+    modelPath: "/images/vitafer-bottle.png",
+    scale: 2.5,
     rotation: [0, 0, 0],
+    price: "$ 1.000",
+    presentation: "Frasco de 500 mL",
+    description:
+      "El clásico multivitamínico líquido que enciende tu energía. Ideal para el rendimiento diario y la resistencia sexual. 💪🔥",
   },
   {
-    name: "Python Developer",
-    modelPath: "/models/python-transformed.glb",
-    scale: 0.8,
+    name: "🔥 Vitafer-L Sachet 10mL",
+    modelPath: "/images/sachet.png",
+    scale: 3,
     rotation: [0, 0, 0],
+    price: "$ 800",
+    presentation: "Display x 16 unds de 10mL",
+    description:
+      "Potencia en formato práctico. Llévalo contigo y recárgate cuando quieras. Ideal para encuentros espontáneos. 😉💧",
   },
   {
-    name: "Backend Developer",
-    modelPath: "/models/node-transformed.glb",
-    scale: 5,
-    rotation: [0, -Math.PI / 2, 0],
-  },
-  {
-    name: "Interactive Developer",
-    modelPath: "/models/three.js-transformed.glb",
-    scale: 0.05,
+    name: "🔞 Vitafer-L Shots 20mL",
+    modelPath: "/images/bottles-pack.png",
+    scale: 3,
     rotation: [0, 0, 0],
-  },
-  {
-    name: "Project Manager",
-    modelPath: "/models/git-svg-transformed.glb",
-    scale: 0.05,
-    rotation: [0, -Math.PI / 4, 0],
+    price: "$ 1.500",
+    presentation: "Display x 24 unds de 20mL",
+    description:
+      "La dosis explosiva para noches inolvidables. Siente la vitalidad, el placer y la potencia en cada trago. 🍷🔥",
   },
 ];
 

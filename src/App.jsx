@@ -8,6 +8,7 @@ import ShowcaseSection from "./sections/ShowcaseSection";
 import LogoShowcase from "./sections/LogoShowcase";
 import FeatureCards from "./sections/FeatureCards";
 import Navbar from "./components/NavBar";
+import AnimatedCounter from "./components/AnimatedCounter";
 
 const App = () => (
   <>
@@ -19,6 +20,7 @@ const App = () => (
     <Experience />
     <TechStack />
     <Testimonials />
+    <AnimatedCounter />
     <Contact />
     <Footer />
   </>

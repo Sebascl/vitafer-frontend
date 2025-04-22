@@ -44,41 +44,65 @@ const AppShowcase = () => {
   }, []);
 
   return (
-    <div id="work" ref={sectionRef} className="app-showcase">
+    <div
+      id="work"
+      ref={sectionRef}
+      className="app-showcase bg-black text-white py-16"
+    >
       <div className="w-full">
         <div className="showcaselayout">
-          <div ref={rydeRef} className="first-project-wrapper">
-            <div className="image-wrapper">
-              <img src="/images/project1.png" alt="Ryde App Interface" />
+          {/* Primera Sección: Vitafer */}
+          <div
+            ref={rydeRef}
+            className="first-project-wrapper flex flex-col md:flex-row items-center gap-8"
+          >
+            <div className="image-wrapper max-w-md">
+              <img
+                src="/images/vitafer-showcase.png"
+                alt="Vitafer Performance"
+                className="rounded-xl shadow-lg border-4 border-red-600"
+              />
             </div>
-            <div className="text-content">
-              <h2>
-                On-Demand Rides Made Simple with a Powerful, User-Friendly App
-                called Ryde
+            <div className="text-content max-w-xl">
+              <h2 className="text-3xl md:text-4xl font-bold text-red-500">
+                Potencia Masculina al Máximo con{" "}
+                <span className="text-yellow-400">Vitafer Gold</span>
               </h2>
-              <p className="text-white-50 md:text-xl">
-                An app built with React Native, Expo, & TailwindCSS for a fast,
-                user-friendly experience.
+              <p className="text-white/80 text-lg mt-4">
+                Descubre el secreto de las noches más intensas. Vitafer estimula
+                tu deseo, tu resistencia y tu confianza como nunca antes.
               </p>
             </div>
           </div>
 
-          <div className="project-list-wrapper overflow-hidden">
+          {/* Otras Secciones - puedes convertirlas en beneficios */}
+          <div className="project-list-wrapper overflow-hidden grid md:grid-cols-2 gap-8 mt-20">
+            {/* Beneficio 1 */}
             <div className="project" ref={libraryRef}>
-              <div className="image-wrapper bg-[#FFEFDB]">
+              <div className="image-wrapper bg-[#FFEEF0] p-4 rounded-xl shadow-md">
                 <img
-                  src="/images/project2.png"
-                  alt="Library Management Platform"
+                  src="/images/benefit1.png"
+                  alt="Energía sin límites"
+                  className="rounded-lg"
                 />
               </div>
-              <h2>The Library Management Platform</h2>
+              <h2 className="text-2xl font-semibold text-center mt-4 text-white">
+                Energía que Dura Toda la Noche
+              </h2>
             </div>
 
+            {/* Beneficio 2 */}
             <div className="project" ref={ycDirectoryRef}>
-              <div className="image-wrapper bg-[#FFE7EB]">
-                <img src="/images/project3.png" alt="YC Directory App" />
+              <div className="image-wrapper bg-[#FFF3E6] p-4 rounded-xl shadow-md">
+                <img
+                  src="/images/benefit2.png"
+                  alt="Confianza total"
+                  className="rounded-lg"
+                />
               </div>
-              <h2>YC Directory - A Startup Showcase App</h2>
+              <h2 className="text-2xl font-semibold text-center mt-4 text-white">
+                Confianza y Potencia en Cada Encuentro
+              </h2>
             </div>
           </div>
         </div>
