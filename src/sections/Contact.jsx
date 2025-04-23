@@ -1,115 +1,67 @@
-import { useRef, useState } from "react";
-import emailjs from "@emailjs/browser";
+import React, { useRef } from 'react';
+import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { FaWhatsapp } from 'react-icons/fa';
 
 import TitleHeader from "../components/TitleHeader";
-import ContactExperience from "../components/models/contact/ContactExperience";
+
+gsap.registerPlugin(ScrollTrigger);
 
 const Contact = () => {
-  const formRef = useRef(null);
-  const [loading, setLoading] = useState(false);
-  const [form, setForm] = useState({
-    name: "",
-    email: "",
-    message: "",
-  });
+  const contactCardRef = useRef(null);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setForm({ ...form, [name]: value });
-  };
+  const whatsappNumber = "+57XXXXXXXXXX"; // IMPORTANTE: Reemplaza con tu número real
+  const defaultMessage = "Hola! 🔥 Quiero saber más sobre Vitafer.";
+  const encodedMessage = encodeURIComponent(defaultMessage);
+  const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true); // Show loading state
-
-    try {
-      await emailjs.sendForm(
-        import.meta.env.VITE_APP_EMAILJS_SERVICE_ID,
-        import.meta.env.VITE_APP_EMAILJS_TEMPLATE_ID,
-        formRef.current,
-        import.meta.env.VITE_APP_EMAILJS_PUBLIC_KEY
-      );
-
-      // Reset form and stop loading
-      setForm({ name: "", email: "", message: "" });
-    } catch (error) {
-      console.error("EmailJS Error:", error); // Optional: show toast
-    } finally {
-      setLoading(false); // Always stop loading, even on error
+  useGSAP(() => {
+    if (contactCardRef.current) {
+      gsap.from(contactCardRef.current, {
+        opacity: 0,
+        y: 60,
+        duration: 1.2,
+        ease: "power3.out",
+        scrollTrigger: {
+          trigger: contactCardRef.current,
+          start: "top 90%",
+          end: "bottom 20%",
+          toggleActions: "play none none reverse",
+        },
+      });
     }
-  };
+  }, { scope: contactCardRef });
 
   return (
-    <section id="contact" className="flex-center section-padding">
-      <div className="w-full h-full md:px-10 px-5">
+    <section
+      id="contact"
+      className="flex-center md:mt-40 mt-20 section-padding xl:px-0 overflow-hidden bg-gradient-to-b from-black via-gray-950 to-black"
+    >
+      <div className="w-full h-full md:px-10 lg:px-20 px-5">
         <TitleHeader
-          title="Get in Touch – Let’s Connect"
-          sub="💬 Have questions or ideas? Let’s talk! 🚀"
+          title="¿Sientes la Curiosidad?"
+          sub="✨ Tu viaje hacia el placer comienza con un mensaje. Hablemos discretamente."
         />
-        <div className="grid-12-cols mt-16">
-          <div className="xl:col-span-5">
-            <div className="flex-center card-border rounded-xl p-10">
-              <form
-                ref={formRef}
-                onSubmit={handleSubmit}
-                className="w-full flex flex-col gap-7"
+
+        <div className="flex justify-center mt-16 md:mt-24">
+          {/* Outer div for gradient border and shadow */}
+          <div
+            ref={contactCardRef}
+            className="w-full max-w-lg p-1 rounded-xl bg-gradient-to-br from-amber-400 via-red-500 to-amber-500 shadow-2xl shadow-amber-500/30 hover:shadow-amber-400/40 transition-shadow duration-400 ease-out hover:scale-[1.02] transform"
+          >
+            {/* Inner div for content background */}
+            <div className="h-full w-full p-8 md:p-10 rounded-[10px] bg-gradient-to-br from-zinc-900 via-black to-black">
+              <a
+                href={whatsappUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-3 text-center font-semibold text-lg md:text-xl lg:text-2xl text-amber-400 hover:text-amber-200 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2 focus:ring-offset-black rounded-lg transition-all duration-300 py-4 px-6 group transform hover:scale-[1.03]"
+                aria-label="Iniciar chat en WhatsApp sobre Vitafer"
               >
-                <div>
-                  <label htmlFor="name">Your name</label>
-                  <input
-                    type="text"
-                    id="name"
-                    name="name"
-                    value={form.name}
-                    onChange={handleChange}
-                    placeholder="What’s your good name?"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="email">Your Email</label>
-                  <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    value={form.email}
-                    onChange={handleChange}
-                    placeholder="What’s your email address?"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="message">Your Message</label>
-                  <textarea
-                    id="message"
-                    name="message"
-                    value={form.message}
-                    onChange={handleChange}
-                    placeholder="How can I help you?"
-                    rows="5"
-                    required
-                  />
-                </div>
-
-                <button type="submit">
-                  <div className="cta-button group">
-                    <div className="bg-circle" />
-                    <p className="text">
-                      {loading ? "Sending..." : "Send Message"}
-                    </p>
-                    <div className="arrow-wrapper">
-                      <img src="/images/arrow-down.svg" alt="arrow" />
-                    </div>
-                  </div>
-                </button>
-              </form>
-            </div>
-          </div>
-          <div className="xl:col-span-7 min-h-96">
-            <div className="bg-[#cd7c2e] w-full h-full hover:cursor-grab rounded-3xl overflow-hidden">
-              <ContactExperience />
+                <FaWhatsapp className="w-6 h-6 lg:w-7 lg:h-7 group-hover:scale-110 transition-transform duration-300" />
+                <span>Chatea Ahora y Enciende la Llama</span>
+              </a>
             </div>
           </div>
         </div>

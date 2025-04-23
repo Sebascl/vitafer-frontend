@@ -1,144 +1,161 @@
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-
-import { expCards } from "../constants";
+import { useRef } from "react";
+import { expCards, expCards2 } from "../constants";
 import TitleHeader from "../components/TitleHeader";
-import GlowCard from "../components/GlowCard";
 
 gsap.registerPlugin(ScrollTrigger);
 
 const Experience = () => {
-  useGSAP(() => {
-    // Loop through each timeline card and animate them in
-    // as the user scrolls to each card
-    gsap.utils.toArray(".timeline-card").forEach((card) => {
-      // Animate the card coming in from the left
-      // and fade in
-      gsap.from(card, {
-        // Move the card in from the left
-        xPercent: -100,
-        // Make the card invisible at the start
-        opacity: 0,
-        // Set the origin of the animation to the left side of the card
-        transformOrigin: "left left",
-        // Animate over 1 second
-        duration: 1,
-        // Use a power2 ease-in-out curve
-        ease: "power2.inOut",
-        // Trigger the animation when the card is 80% of the way down the screen
-        scrollTrigger: {
-          // The card is the trigger element
-          trigger: card,
-          // Trigger the animation when the card is 80% down the screen
-          start: "top 80%",
-        },
-      });
-    });
+  const container = useRef(null);
 
-    // Animate the timeline height as the user scrolls
-    // from the top of the timeline to 70% down the screen
-    // The timeline height should scale down from 1 to 0
-    // as the user scrolls up the screen
-    gsap.to(".timeline", {
-      // Set the origin of the animation to the bottom of the timeline
-      transformOrigin: "bottom bottom",
-      // Animate the timeline height over 1 second
-      ease: "power1.inOut",
-      // Trigger the animation when the timeline is at the top of the screen
-      // and end it when the timeline is at 70% down the screen
-      scrollTrigger: {
-        trigger: ".timeline",
-        start: "top center",
-        end: "70% center",
-        // Update the animation as the user scrolls
-        onUpdate: (self) => {
-          // Scale the timeline height as the user scrolls
-          // from 1 to 0 as the user scrolls up the screen
-          gsap.to(".timeline", {
-            scaleY: 1 - self.progress,
-          });
-        },
-      },
-    });
+  useGSAP(
+    () => {
+      const contentEl = container.current;
 
-    // Loop through each expText element and animate them in
-    // as the user scrolls to each text element
-    gsap.utils.toArray(".expText").forEach((text) => {
-      // Animate the text opacity from 0 to 1
-      // and move it from the left to its final position
-      // over 1 second with a power2 ease-in-out curve
-      gsap.from(text, {
-        // Set the opacity of the text to 0
-        opacity: 0,
-        // Move the text from the left to its final position
-        // (xPercent: 0 means the text is at its final position)
-        xPercent: 0,
-        // Animate over 1 second
-        duration: 1,
-        // Use a power2 ease-in-out curve
-        ease: "power2.inOut",
-        // Trigger the animation when the text is 60% down the screen
-        scrollTrigger: {
-          // The text is the trigger element
-          trigger: text,
-          // Trigger the animation when the text is 60% down the screen
-          start: "top 60%",
-        },
+      gsap.utils.toArray(".timeline-card").forEach((card) => {
+        const isLeftCard = card.classList.contains("card-left");
+        gsap.from(card, {
+          xPercent: isLeftCard ? -100 : 100,
+          opacity: 0,
+          duration: 1.2,
+          ease: "expo.out",
+          scrollTrigger: {
+            trigger: card,
+            start: "top 88%",
+            toggleActions: "play none none reverse",
+          },
+        });
       });
-    }, "<"); // position parameter - insert at the start of the animation
-  }, []);
+
+      if (contentEl) {
+        gsap.fromTo(
+          ".timeline",
+          { scaleY: 0 },
+          {
+            scaleY: 1,
+            transformOrigin: "top top",
+            ease: "none",
+            scrollTrigger: {
+              trigger: contentEl,
+              start: "top center",
+              end: () => `bottom bottom-=${contentEl.offsetHeight * 0.1}`,
+              scrub: true,
+            },
+          }
+        );
+      }
+
+      gsap.utils.toArray(".expText-content").forEach((textContainer) => {
+        gsap.from(textContainer, {
+          opacity: 0,
+          y: 40,
+          duration: 1,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: textContainer.closest(".exp-card-wrapper"),
+            start: "top 85%",
+            toggleActions: "play none none reverse",
+          },
+        });
+      });
+
+      gsap.utils.toArray(".timeline-logo img").forEach((logoImg) => { 
+        gsap.from(logoImg, {
+          opacity: 0,
+          scale: 0.2,
+          rotate: -45,
+          duration: 0.8,
+          ease: "expo.out",
+          scrollTrigger: {
+            trigger: logoImg.closest('.timeline-logo'),
+            start: "top center+=30",
+            end: "bottom center-=30",
+            toggleActions: "play none none reverse",
+          },
+        });
+      });
+    },
+    { scope: container }
+  );
 
   return (
     <section
       id="experience"
-      className="flex-center md:mt-40 mt-20 section-padding xl:px-0"
+      className="flex-center md:mt-40 mt-20 section-padding xl:px-0 overflow-hidden bg-gradient-to-b from-black via-gray-950 to-black"
     >
-      <div className="w-full h-full md:px-20 px-5">
+      <div className="w-full h-full md:px-10 lg:px-20 px-5">
         <TitleHeader
-          title="Professional Work Experience"
-          sub="💼 My Career Overview"
+          title="El Viaje Hacia el Éxtasis"
+          sub="✨ Descubre Cada Etapa del Placer"
         />
-        <div className="mt-32 relative">
-          <div className="relative z-10 xl:space-y-32 space-y-10">
+
+        <div
+          ref={container}
+          id="experience-content"
+          className="mt-24 relative flex flex-col xl:flex-row xl:justify-between xl:gap-20"
+        >
+          <div className="xl:w-5/12 relative z-10 space-y-16 xl:space-y-24 xl:order-1 order-2 pt-10 xl:pt-0">
             {expCards.map((card) => (
-              <div key={card.title} className="exp-card-wrapper">
-                <div className="xl:w-2/6">
-                  <GlowCard card={card}>
-                    <div>
-                      <img src={card.imgPath} alt="exp-img" />
-                    </div>
-                  </GlowCard>
+              <div
+                key={card.title}
+                className={`exp-card-wrapper timeline-card card-left flex justify-end`}
+              >
+                <div className={`expText flex flex-row-reverse text-right xl:gap-10 md:gap-8 gap-5 relative z-20 w-full max-w-md 
+                                 p-6 rounded-lg bg-gradient-to-br ${card.bgColor || 'from-zinc-900 to-black'} 
+                                 border border-transparent hover:border-white/20 transition-colors duration-300`}
+                >
+                  <div className="timeline-logo flex-shrink-0 w-12 h-12 md:w-14 md:h-14 xl:-mr-[6rem] self-center">
+                    <img
+                      src={card.logoPath}
+                      alt={card.title}
+                      className="w-full h-full object-contain filter drop-shadow-[0_0_8px_rgba(252,211,77,0.6)]"
+                    />
+                  </div>
+                  <div className="flex-grow expText-content">
+                    <h3 className={`font-semibold text-xl md:text-2xl mb-3 ${card.accentColor || 'text-amber-400'}`}>
+                      {card.title}
+                    </h3>
+                    <p className="text-sm md:text-base text-white/70 leading-relaxed">
+                      {card.description}
+                    </p>
+                  </div>
                 </div>
-                <div className="xl:w-4/6">
-                  <div className="flex items-start">
-                    <div className="timeline-wrapper">
-                      <div className="timeline" />
-                      <div className="gradient-line w-1 h-full" />
-                    </div>
-                    <div className="expText flex xl:gap-20 md:gap-10 gap-5 relative z-20">
-                      <div className="timeline-logo">
-                        <img src={card.logoPath} alt="logo" />
-                      </div>
-                      <div>
-                        <h1 className="font-semibold text-3xl">{card.title}</h1>
-                        <p className="my-5 text-white-50">
-                          🗓️&nbsp;{card.date}
-                        </p>
-                        <p className="text-[#839CB5] italic">
-                          Responsibilities
-                        </p>
-                        <ul className="list-disc ms-5 mt-5 flex flex-col gap-5 text-white-50">
-                          {card.responsibilities.map(
-                            (responsibility, index) => (
-                              <li key={index} className="text-lg">
-                                {responsibility}
-                              </li>
-                            )
-                          )}
-                        </ul>
-                      </div>
-                    </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="relative flex-shrink-0 xl:w-auto w-full flex justify-center xl:order-2 order-1 px-5">
+            <div className="timeline-wrapper flex flex-col items-center w-full h-full">
+              <div className="timeline w-1 bg-gradient-to-b from-amber-300 via-amber-500 to-red-600 origin-top h-full rounded-full shadow-lg shadow-amber-500/30" />
+            </div>
+          </div>
+
+          <div className="xl:w-5/12 relative z-10 space-y-16 xl:space-y-24 xl:order-3 order-3 pt-10 xl:pt-0">
+            {expCards2.map((card) => (
+               <div
+                key={card.title}
+                className={`exp-card-wrapper timeline-card card-right flex justify-start`}
+               >
+                <div className={`expText flex flex-row text-left xl:gap-10 md:gap-8 gap-5 relative z-20 w-full max-w-md 
+                                 p-6 rounded-lg bg-gradient-to-bl ${card.bgColor || 'from-zinc-900 to-black'} 
+                                 border border-transparent hover:border-white/20 transition-colors duration-300`}
+                 >
+                  <div className="timeline-logo flex-shrink-0 w-12 h-12 md:w-14 md:h-14 xl:-ml-[6rem] order-first self-center">
+                    <img
+                      src={card.logoPath}
+                      alt={card.title}
+                      className="w-full h-full object-contain filter drop-shadow-[0_0_8px_rgba(252,211,77,0.6)]"
+                    />
+                  </div>
+                  <div className="flex-grow expText-content">
+                    <h3 className={`font-semibold text-xl md:text-2xl mb-3 ${card.accentColor || 'text-amber-400'}`}>
+                      {card.title}
+                    </h3>
+                    <p className="text-sm md:text-base text-white/70 leading-relaxed">
+                      {card.description}
+                    </p>
                   </div>
                 </div>
               </div>

@@ -18,8 +18,10 @@
     "@tailwindcss/vite": "^4.1.4",
     "@types/three": "^0.175.0",
     "gsap": "^3.12.7",
+    "lucide-react": "^0.503.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "react-icons": "^5.5.0",
     "react-responsive": "^10.0.1",
     "tailwindcss": "^4.1.4",
     "three": "^0.175.0"

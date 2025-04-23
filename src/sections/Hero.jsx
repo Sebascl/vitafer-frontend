@@ -23,7 +23,7 @@ const Hero = () => {
   return (
     <section id="hero" className="relative overflow-hidden bg-black">
       {/* Background image */}
-      <div className="absolute top-0 left-0 z-0 w-full h-screen">
+      <div className="absolute top-0 left-0 z-10">
         <img
           src="/images/bg.png"
           alt="Vitafer background"
@@ -32,7 +32,7 @@ const Hero = () => {
       </div>
 
       {/* Content layout */}
-      <div className="hero-layout flex flex-col md:flex-row items-center justify-between min-h-screen relative z-10 w-full px-4">
+      <div className="hero-layout flex flex-col md:flex-row items-center justify-between relative z-10 w-full px-4">
         {/* Left: Header */}
         <header className="hero-header">
           <div className="flex flex-col gap-7">
