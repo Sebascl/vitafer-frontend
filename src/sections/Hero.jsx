@@ -23,13 +23,7 @@ const Hero = () => {
   return (
     <section id="hero" className="relative overflow-hidden bg-black">
       {/* Background image */}
-      <div className="absolute top-0 left-0 z-10">
-        <img
-          src="/images/bg.png"
-          alt="Vitafer background"
-          className="w-full h-full object-cover filter sepia-100 saturate-300 brightness-150 mix-blend-color-dodge"
-        />
-      </div>
+
 
       {/* Content layout */}
       <div className="hero-layout flex flex-col md:flex-row items-center justify-between relative z-10 w-full px-4">

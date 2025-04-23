@@ -6,7 +6,7 @@ const handleLinkClick = (e, link, setMenuOpen) => {
   e.preventDefault();
   const targetElement = document.querySelector(link);
   if (targetElement) {
-    const offsetTop = targetElement.offsetTop - 120;
+    const offsetTop = targetElement.offsetTop - 100; // Adjusted offset
     window.scrollTo({ top: offsetTop, behavior: "smooth" });
   }
   setMenuOpen(false);
@@ -34,21 +34,23 @@ const NavBar = () => {
 
   return (
     <header
-      className={`fixed top-0 w-full z-50 transition-all duration-300 ${
-        scrolled ? "bg-black shadow-lg" : "bg-transparent"
+      className={`fixed top-0 w-full z-50 transition-all duration-300 ease-in-out ${
+        scrolled
+          ? "bg-black/80 backdrop-blur-md shadow-lg border-b border-amber-500/30"
+          : "bg-transparent"
       }`}
     >
-      <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-        <a href="#hero" className="flex items-center">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex justify-between items-center">
+        <a href="#hero" className="flex items-center flex-shrink-0 group">
           <img
             src="/images/vitafer-logo.png"
             alt="Vitafer Logo"
-            className="h-20 w-auto"
+            className="h-20 w-50 transition-opacity duration-300 group-hover:opacity-90"
           />
         </a>
 
-        <nav className="hidden md:flex space-x-8">
-          {navLinks.map(({ name, link }) => (
+        <nav className="hidden md:flex items-center space-x-6 lg:space-x-8">
+        {navLinks.map(({ name, link }) => (
             <a
               key={name}
               href={link}
@@ -68,7 +70,7 @@ const NavBar = () => {
         </a>
 
         <button
-          className="md:hidden text-yellow-500 focus:outline-none"
+          className="md:hidden text-amber-400 focus:outline-none hover:text-amber-300 transition-colors"
           onClick={() => setMenuOpen(!menuOpen)}
           aria-label={menuOpen ? "Cerrar menú" : "Abrir menú"}
         >
