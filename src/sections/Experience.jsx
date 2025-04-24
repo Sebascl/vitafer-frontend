@@ -1,8 +1,10 @@
+import React from 'react'; // <--- AÑADE ESTA LÍNEA
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useRef } from "react";
-import { expCards, expCards2 } from "../constants";
+// Asegúrate que la ruta de importación sea correcta
+import { expCards, expCards2 } from "../constants"; 
 import TitleHeader from "../components/TitleHeader";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -12,6 +14,7 @@ const Experience = () => {
 
   useGSAP(
     () => {
+      // --- Tu código GSAP existente (SIN CAMBIOS) ---
       const contentEl = container.current;
 
       gsap.utils.toArray(".timeline-card").forEach((card) => {
@@ -61,21 +64,24 @@ const Experience = () => {
         });
       });
 
-      gsap.utils.toArray(".timeline-logo img").forEach((logoImg) => { 
-        gsap.from(logoImg, {
-          opacity: 0,
-          scale: 0.2,
-          rotate: -45,
-          duration: 0.8,
-          ease: "expo.out",
-          scrollTrigger: {
-            trigger: logoImg.closest('.timeline-logo'),
-            start: "top center+=30",
-            end: "bottom center-=30",
-            toggleActions: "play none none reverse",
-          },
-        });
-      });
+       // Animación para el contenedor del icono (antes .timeline-logo img)
+       // Cambiamos el selector para que apunte al contenedor del icono
+       gsap.utils.toArray(".timeline-logo").forEach((logoContainer) => {
+         gsap.from(logoContainer.children[0], { // Apuntamos al icono dentro del div
+           opacity: 0,
+           scale: 0.2,
+           rotate: -45,
+           duration: 0.8,
+           ease: "expo.out",
+           scrollTrigger: {
+             trigger: logoContainer, // El trigger sigue siendo el contenedor
+             start: "top center+=30",
+             end: "bottom center-=30",
+             toggleActions: "play none none reverse",
+           },
+         });
+       });
+      // --- Fin de tu código GSAP ---
     },
     { scope: container }
   );
@@ -88,7 +94,7 @@ const Experience = () => {
       <div className="w-full h-full md:px-10 lg:px-20 px-5">
         <TitleHeader
           title="El Viaje Hacia el Éxtasis"
-          sub="✨ Descubre Cada Etapa del Placer"
+          sub="✨ Despierta Tus Sentidos Más Profundos" // Subtítulo ajustado
         />
 
         <div
@@ -96,22 +102,25 @@ const Experience = () => {
           id="experience-content"
           className="mt-24 relative flex flex-col xl:flex-row xl:justify-between xl:gap-20"
         >
+          {/* --- Columna Izquierda --- */}
           <div className="xl:w-5/12 relative z-10 space-y-16 xl:space-y-24 xl:order-1 order-2 pt-10 xl:pt-0">
             {expCards.map((card) => (
               <div
                 key={card.title}
                 className={`exp-card-wrapper timeline-card card-left flex justify-end`}
               >
-                <div className={`expText flex flex-row-reverse text-right xl:gap-10 md:gap-8 gap-5 relative z-20 w-full max-w-md 
-                                 p-6 rounded-lg bg-gradient-to-br ${card.bgColor || 'from-zinc-900 to-black'} 
+                <div className={`expText flex flex-row-reverse text-right xl:gap-10 md:gap-8 gap-5 relative z-20 w-full max-w-md
+                                 p-6 rounded-lg bg-gradient-to-br ${card.bgColor || 'from-zinc-900 to-black'}
                                  border border-transparent hover:border-white/20 transition-colors duration-300`}
                 >
-                  <div className="timeline-logo flex-shrink-0 w-12 h-12 md:w-14 md:h-14 xl:-mr-[6rem] self-center">
-                    <img
-                      src={card.logoPath}
-                      alt={card.title}
-                      className="w-full h-full object-contain filter drop-shadow-[0_0_8px_rgba(252,211,77,0.6)]"
-                    />
+                  {/* Contenedor del icono */}
+                  <div className="timeline-logo flex-shrink-0 w-12 h-12 md:w-14 md:h-14 xl:-mr-[6rem] self-center flex items-center justify-center">
+                    {/* ** CAMBIO AQUÍ: Renderizar el icono en lugar de la imagen ** */}
+                    {React.cloneElement(card.icon, {
+                      // Clonamos el icono para añadirle clases
+                      className: `w-8 h-8 md:w-10 md:h-10 ${card.accentColor || 'text-amber-400'} filter drop-shadow-[0_0_8px_rgba(252,211,77,0.6)]`, // Ajusta tamaño y aplica color y sombra
+                      // Puedes ajustar el tamaño (w- y h-) como necesites
+                    })}
                   </div>
                   <div className="flex-grow expText-content">
                     <h3 className={`font-semibold text-xl md:text-2xl mb-3 ${card.accentColor || 'text-amber-400'}`}>
@@ -126,28 +135,32 @@ const Experience = () => {
             ))}
           </div>
 
+          {/* --- Línea de Tiempo Central (SIN CAMBIOS) --- */}
           <div className="relative flex-shrink-0 xl:w-auto w-full flex justify-center xl:order-2 order-1 px-5">
             <div className="timeline-wrapper flex flex-col items-center w-full h-full">
               <div className="timeline w-1 bg-gradient-to-b from-amber-300 via-amber-500 to-red-600 origin-top h-full rounded-full shadow-lg shadow-amber-500/30" />
             </div>
           </div>
 
+          {/* --- Columna Derecha --- */}
           <div className="xl:w-5/12 relative z-10 space-y-16 xl:space-y-24 xl:order-3 order-3 pt-10 xl:pt-0">
             {expCards2.map((card) => (
                <div
                 key={card.title}
                 className={`exp-card-wrapper timeline-card card-right flex justify-start`}
                >
-                <div className={`expText flex flex-row text-left xl:gap-10 md:gap-8 gap-5 relative z-20 w-full max-w-md 
-                                 p-6 rounded-lg bg-gradient-to-bl ${card.bgColor || 'from-zinc-900 to-black'} 
+                <div className={`expText flex flex-row text-left xl:gap-10 md:gap-8 gap-5 relative z-20 w-full max-w-md
+                                 p-6 rounded-lg bg-gradient-to-bl ${card.bgColor || 'from-zinc-900 to-black'}
                                  border border-transparent hover:border-white/20 transition-colors duration-300`}
                  >
-                  <div className="timeline-logo flex-shrink-0 w-12 h-12 md:w-14 md:h-14 xl:-ml-[6rem] order-first self-center">
-                    <img
-                      src={card.logoPath}
-                      alt={card.title}
-                      className="w-full h-full object-contain filter drop-shadow-[0_0_8px_rgba(252,211,77,0.6)]"
-                    />
+                  {/* Contenedor del icono */}
+                  <div className="timeline-logo flex-shrink-0 w-12 h-12 md:w-14 md:h-14 xl:-ml-[6rem] order-first self-center flex items-center justify-center">
+                    {/* ** CAMBIO AQUÍ: Renderizar el icono en lugar de la imagen ** */}
+                     {React.cloneElement(card.icon, {
+                        // Clonamos el icono para añadirle clases
+                       className: `w-8 h-8 md:w-10 md:h-10 ${card.accentColor || 'text-amber-400'} filter drop-shadow-[0_0_8px_rgba(252,211,77,0.6)]`, // Ajusta tamaño y aplica color y sombra
+                      // Puedes ajustar el tamaño (w- y h-) como necesites
+                    })}
                   </div>
                   <div className="flex-grow expText-content">
                     <h3 className={`font-semibold text-xl md:text-2xl mb-3 ${card.accentColor || 'text-amber-400'}`}>
