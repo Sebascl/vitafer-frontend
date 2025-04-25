@@ -207,42 +207,42 @@ const testimonials = [
     mentions: "@carlosgomez",
     review:
       "Desde que empecé a tomar Vitafer, mi energía subió de golpe. No solo en el gimnasio, también en mis momentos más íntimos. Me siento mucho más fuerte, con más ganas y más activo. Se nota mucho la diferencia.",
-    imgPath: "/images/client1.png",
+    imgPath: "/images/perfiles/perfil1.jpg",
   },
   {
     name: "Lucía Martínez",
     mentions: "@luciamtz",
     review:
       "Lo compré para mi pareja y el cambio fue impresionante. Está mucho más activo, no solo en lo físico, sino también en lo íntimo. Es un cambio real, lo notamos los dos.",
-    imgPath: "/images/client2.png",
-  },
+    imgPath: "/images/perfiles/perfil5.jpg",
+    },
   {
     name: "Jorge Ramírez",
     mentions: "@jramirez",
     review:
       "Vitafer me ayudó a quitarme el cansancio que tenía. Ahora tengo más energía, especialmente para disfrutar los momentos más íntimos. Se nota en todos los aspectos de mi vida, me siento mucho mejor.",
-    imgPath: "/images/client3.png",
-  },
+      imgPath: "/images/perfiles/perfil3.jpg",
+    },
   {
     name: "Valentina Ríos",
     mentions: "@valentinar",
     review:
       "Quedé sorprendida con los resultados. Mi pareja está mucho más activo, especialmente cuando se trata de nuestra intimidad. Vitafer realmente hace lo que promete, es algo que sin duda volvería a comprar.",
-    imgPath: "/images/client4.png",
+      imgPath: "/images/perfiles/perfil4.jpg",
   },
   {
     name: "Pedro Torres",
     mentions: "@pedritot",
     review:
       "Probé varios productos, pero ninguno me dio los resultados que Vitafer. No solo me siento con más energía, sino que también ha mejorado mi rendimiento en los momentos más íntimos. Ya pedí más.",
-    imgPath: "/images/client5.png",
+      imgPath: "/images/perfiles/perfil2.jpg",
   },
   {
     name: "Camila Fernández",
     mentions: "@camilafdz",
     review:
       "Mi pareja notó el cambio de inmediato. Ahora está mucho más relajado, con más energía y un ánimo increíble. Vitafer ha mejorado nuestra conexión, es un producto que de verdad funciona.",
-    imgPath: "/images/client6.png",
+      imgPath: "/images/perfiles/perfil6.jpg",
   },
 ];
 

@@ -89,7 +89,7 @@ const Experience = () => {
   return (
     <section
       id="experience"
-      className="flex-center md:mt-40 mt-20 section-padding xl:px-0 overflow-hidden bg-gradient-to-b from-black via-gray-950 to-black"
+      className="flex-center md:mt-20 mt-10 section-padding xl:px-0 overflow-hidden bg-gradient-to-b from-black via-gray-950 to-black"
     >
       <div className="w-full h-full md:px-10 lg:px-20 px-5">
         <TitleHeader
@@ -100,7 +100,7 @@ const Experience = () => {
         <div
           ref={container}
           id="experience-content"
-          className="mt-24 relative flex flex-col xl:flex-row xl:justify-between xl:gap-20"
+          className="mt-14 relative flex flex-col xl:flex-row xl:justify-between xl:gap-20"
         >
           {/* --- Columna Izquierda --- */}
           <div className="xl:w-5/12 relative z-10 space-y-16 xl:space-y-24 xl:order-1 order-2 pt-10 xl:pt-0">

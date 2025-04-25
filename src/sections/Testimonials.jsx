@@ -61,7 +61,7 @@ const TestimonialsSensual = () => {
     <section
       id="experiencias"
       ref={sectionRef}
-      className="bg-gradient-to-b from-black via-amber-950/20 to-black text-white py-24 px-6 md:px-10 lg:px-16 mt-15"
+      className="bg-gradient-to-b from-black via-amber-950/20 to-black text-white py-10 px-6 md:px-10 lg:px-16 mt-15"
     >
       <div className="w-full max-w-6xl mx-auto">
         <div className="text-center mb-16 md:mb-20">

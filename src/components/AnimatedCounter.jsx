@@ -1,10 +1,8 @@
 import { useRef } from "react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
-import { ScrollTrigger } from "gsap/ScrollTrigger"; // Importar desde aquí es común
-
-import { counterItems } from "../constants"; // Asegúrate que la ruta sea correcta y los datos sean evocadores
-
+import { ScrollTrigger } from "gsap/ScrollTrigger"; 
+import { counterItems } from "../constants"; 
 gsap.registerPlugin(ScrollTrigger);
 
 const AnimatedCounterSensual = () => {
@@ -81,7 +79,7 @@ const AnimatedCounterSensual = () => {
     <section
       ref={sectionRef}
       id="resultados-pasion" 
-      className="bg-gradient-to-b from-black via-zinc-950/60 to-black py-20 md:py-28 px-4 md:px-8"
+      className="bg-gradient-to-b from-black via-zinc-950/60 to-black py-10 md:py-10 px-4 md:px-8"
     >
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-16 md:mb-20">

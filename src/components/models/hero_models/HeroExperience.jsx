@@ -7,36 +7,74 @@ import * as THREE from "three";
 const HeroExperience = () => {
   const isMobile = useMediaQuery({ query: "(max-width: 768px)" });
   const [videoTexture, setVideoTexture] = useState(null);
-  const videoRef = useRef(null); // Referencia al video
+  const videoRef = useRef(null);
+  const interactionListenerAttached = useRef(false);
 
   useEffect(() => {
     const video = document.createElement("video");
     video.src = "/images/video1.mp4";
     video.loop = true;
     video.muted = true;
-    video.play().catch((error) => {
-      console.error("Error al reproducir el video:", error);
-    });
-
-    videoRef.current = video; // Guardamos la referencia
+    video.setAttribute('playsinline', 'true');
+    video.crossOrigin = 'anonymous';
+    videoRef.current = video;
 
     const texture = new THREE.VideoTexture(video);
     texture.minFilter = THREE.LinearFilter;
     texture.magFilter = THREE.LinearFilter;
-    texture.generateMipmaps = false;
-
+    texture.format = THREE.RGBAFormat;
     setVideoTexture(texture);
 
+    const attemptPlay = () => {
+       if (videoRef.current && videoRef.current.paused) {
+          videoRef.current.play().catch(error => {
+             console.warn("Autoplay/Play prevented:", error);
+             if (!interactionListenerAttached.current && error.name === "NotAllowedError") {
+                 const handleFirstInteraction = () => {
+                     attemptPlay(); // Reintenta reproducir en la primera interacción
+                     window.removeEventListener('click', handleFirstInteraction, true);
+                     window.removeEventListener('touchstart', handleFirstInteraction, true);
+                     interactionListenerAttached.current = false;
+                 };
+                 window.addEventListener('click', handleFirstInteraction, { once: true, capture: true });
+                 window.addEventListener('touchstart', handleFirstInteraction, { once: true, capture: true });
+                 interactionListenerAttached.current = true;
+             }
+          });
+       }
+    };
+
+    attemptPlay(); // Intento inicial
+
+    video.style.position = 'fixed';
+    video.style.top = '-9999px';
+    video.style.left = '-9999px';
+    document.body.appendChild(video);
+
     return () => {
-      video.src = "";
-      video.load();
+        // La limpieza de los listeners con {once: true} es automática en navegadores modernos
+        // Si se necesitaran remover manualmente, se haría aquí.
+        if (videoRef.current) {
+            videoRef.current.pause();
+            videoRef.current.removeAttribute('src');
+            videoRef.current.load();
+            if (document.body.contains(videoRef.current)) {
+                document.body.removeChild(videoRef.current);
+            }
+            videoRef.current = null;
+        }
+        if (texture) {
+            texture.dispose();
+        }
+        setVideoTexture(null);
+        interactionListenerAttached.current = false;
     };
   }, []);
 
   const handleVideoClick = () => {
     if (videoRef.current) {
       if (videoRef.current.paused) {
-        videoRef.current.play();
+        videoRef.current.play().catch(e => console.error("Error playing on click:", e));
       } else {
         videoRef.current.pause();
       }
@@ -55,10 +93,10 @@ const HeroExperience = () => {
           <mesh
             position={isMobile ? [0, -3, -5] : [0, 0, -8]}
             scale={isMobile ? [12, 6, 1] : [20, 12, 1]}
-            onClick={handleVideoClick} // ✅ Control del video con clic
+            onClick={handleVideoClick}
           >
             <planeGeometry args={[1, 1]} />
-            <meshBasicMaterial map={videoTexture} />
+            <meshBasicMaterial map={videoTexture} side={THREE.DoubleSide} />
           </mesh>
         )}
       </Suspense>

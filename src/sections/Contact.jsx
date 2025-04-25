@@ -36,7 +36,7 @@ const Contact = () => {
   return (
     <section
       id="contact"
-      className="flex-center md:mt-40 mt-20 section-padding xl:px-0 overflow-hidden bg-gradient-to-b from-black via-gray-950 to-black"
+      className="flex-center md:mt-20 mt-10 section-padding xl:px-0 overflow-hidden bg-gradient-to-b from-black via-gray-950 to-black"
     >
       <div className="w-full h-full md:px-10 lg:px-20 px-5">
         <TitleHeader
