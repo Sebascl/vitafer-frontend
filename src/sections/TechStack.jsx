@@ -86,14 +86,22 @@ const TechStack = () => {
           )}
         </div>
       );
-      whatsappPriceInfo = `${formatMXN(baseTier.pricePerUnit)} (${unitDesc.trim()})`; // Info más clara para WhatsApp
+      whatsappPriceInfo = `${formatMXN(baseTier.pricePerUnit)} (${unitDesc.trim()})`;
+
+    } else if (item.price) {
+      priceDisplay = (
+        <p className="text-2xl font-extrabold text-white mt-2">
+          {item.price}
+        </p>
+      );
+      whatsappPriceInfo = item.price; // Usa el precio simple para WhatsApp
 
     } else {
-         priceDisplay = (
-           <p className="text-lg font-semibold text-white/70 mt-2">
-                Consultar precio
-           </p>
-         );
+       priceDisplay = (
+         <p className="text-lg font-semibold text-white/70 mt-2">
+              Consultar precio
+         </p>
+       );
     }
 
     return (
@@ -133,6 +141,7 @@ const TechStack = () => {
       </div>
     );
   };
+
 
   return (
     <div
