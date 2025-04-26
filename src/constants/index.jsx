@@ -103,7 +103,7 @@ const techStackImgs = [
   },
 ];
 
-const techStackIcons = [
+const vitaferProducts = [
   {
     name: "💥 Vitafer-L 500mL",
     modelPath: "/images/vitafer-bottle.png",
@@ -133,6 +133,37 @@ const techStackIcons = [
     presentation: "Display x 24 unds de 20mL",
     description:
       "La dosis explosiva para noches inolvidables. Siente la vitalidad, el placer y la potencia en cada trago. 🍷🔥",
+  },
+];
+
+const vitaferOffers = [
+  {
+    name: "📦 Mayoreo: 25 x Vitafer-L 500mL",
+    modelPath: "/images/vitafer-box.png",
+    scale: 2.5,
+    rotation: [0, 0, 0],
+    pricingTiers: [
+      { quantity: 1, pricePerUnit: 12000 },
+      { quantity: 5, pricePerUnit: 10000 }
+    ],
+    unitDescription: "por caja", // Añadido
+    presentation: "Paquete Mayorista: 25 Frascos de 500 mL",
+    description:
+      "¡Oferta especial para distribuidores! Llévate 25 botellas de 500mL a un precio increíble.",
+  },
+  {
+    name: "📦 Mayoreo: 12 Cajas x 24 Shots 20mL",
+    modelPath: "/images/vitafer-pack.png", // Asegúrate que sea la imagen correcta
+    scale: 3,
+    rotation: [0, 0, 0],
+    // price: "$ 12,000", // Quita el precio simple
+    pricingTiers: [ // Usa pricingTiers también aquí
+      { quantity: 1, pricePerUnit: 12000 } // Solo un nivel de precio
+    ],
+    unitDescription: "", // Añadido (describe a qué se refiere el precio)
+    presentation: "Paquete Mayorista: 12 Displays (288 Shots de 20mL en total)",
+    description:
+      "¡Ideal para eventos o reventa! 12 cajas de nuestros potentes shots de 20mL.",
   },
 ];
 
@@ -276,7 +307,8 @@ export {
   expLogos,
   testimonials,
   socialImgs,
-  techStackIcons,
+  vitaferProducts,
+  vitaferOffers,
   techStackImgs,
   navLinks,
 };

@@ -11,7 +11,7 @@ gsap.registerPlugin(ScrollTrigger);
 const Contact = () => {
   const contactCardRef = useRef(null);
 
-  const whatsappNumber = "+57XXXXXXXXXX"; // IMPORTANTE: Reemplaza con tu número real
+  const whatsappNumber = "528123877607";
   const defaultMessage = "Hola! 🔥 Quiero saber más sobre Vitafer.";
   const encodedMessage = encodeURIComponent(defaultMessage);
   const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
