@@ -70,7 +70,7 @@ const TechStack = () => {
     if (item.pricingTiers && item.pricingTiers.length > 0) {
       const baseTier = item.pricingTiers.find(tier => tier.quantity === 1) || item.pricingTiers[0];
       const discountTier = item.pricingTiers.find(tier => tier.quantity > 1);
-      const unitDesc = item.unitDescription || ""; // Usa la descripción de unidad o nada
+      const unitDesc = item.unitDescription || "";
 
       const formatMXN = (value) => value.toLocaleString('es-MX', { style: 'currency', currency: 'MXN', minimumFractionDigits: 0 });
 
@@ -137,7 +137,7 @@ const TechStack = () => {
   return (
     <div
       id="skills"
-      className="flex-center section-padding bg-black text-white overflow-hidden mb-16" // Asegúrate que el mb-16 sea suficiente, puedes aumentarlo si es necesario (ej. mb-20, mb-24)
+      className="flex-center section-padding bg-black text-white overflow-hidden mb-16 py-10"
     >
       <div className="w-full h-full md:px-10 px-5 max-w-7xl mx-auto">
         <TitleHeader
