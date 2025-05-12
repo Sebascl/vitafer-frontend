@@ -103,7 +103,7 @@ const techStackImgs = [
   },
 ];
 
-const vitaferProducts = [
+/* const vitaferProducts = [
   {
     name: "💥 Vitafer-L 500mL",
     modelPath: "/images/vitafer-bottle.png",
@@ -130,6 +130,39 @@ const vitaferProducts = [
     scale: 3,
     rotation: [0, 0, 0],
     price: "$ 1.500",
+    presentation: "Display x 24 unds de 20mL",
+    description:
+      "La dosis explosiva para noches inolvidables. Siente la vitalidad, el placer y la potencia en cada trago. 🍷🔥",
+  },
+]; */
+
+const vitaferProducts = [
+  {
+    name: "💥 Vitafer-L 500mL",
+    modelPath: "/images/vitafer-bottle.png",
+    scale: 2.5,
+    rotation: [0, 0, 0],
+    price: "$ 10",
+    presentation: "Frasco de 500 mL",
+    description:
+      "El clásico multivitamínico líquido que enciende tu energía. Ideal para el rendimiento diario y la resistencia sexual. 💪🔥",
+  },
+  {
+    name: "🔥 Vitafer-L Sachet 10mL",
+    modelPath: "/images/sachet.png",
+    scale: 3,
+    rotation: [0, 0, 0],
+    price: "$ 80",
+    presentation: "Display x 16 unds de 10mL",
+    description:
+      "Potencia en formato práctico. Llévalo contigo y recárgate cuando quieras. Ideal para encuentros espontáneos. 😉💧",
+  },
+  {
+    name: "🔞 Vitafer-L Shots 20mL",
+    modelPath: "/images/bottles-pack.png",
+    scale: 3,
+    rotation: [0, 0, 0],
+    price: "$ 15",
     presentation: "Display x 24 unds de 20mL",
     description:
       "La dosis explosiva para noches inolvidables. Siente la vitalidad, el placer y la potencia en cada trago. 🍷🔥",

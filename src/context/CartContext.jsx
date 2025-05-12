@@ -1,69 +1,80 @@
-import React, { createContext, useState, useContext, useCallback, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, createContext, useContext } from 'react';
+import Cookies from 'js-cookie';
 
-// --- Helper para obtener el precio numérico ---
-const getNumericPrice = (priceData, quantity = 1) => {
-  if (typeof priceData === 'string') {
-    try {
-      return parseFloat(priceData.replace(/[^0-9.-]+/g,"").replace('.', ''));
-    } catch (e) { return 0; }
-  } else if (Array.isArray(priceData) && priceData.length > 0) {
-    let applicableTier = priceData[0];
-    for (let i = priceData.length - 1; i >= 0; i--) {
-      if (quantity >= priceData[i].quantity) {
-        applicableTier = priceData[i];
-        break;
-      }
-    }
-    return applicableTier.pricePerUnit;
-  }
-  return 0;
-};
-
-// --- Helper para formatear moneda ---
-const formatMXN = (value) => value.toLocaleString('es-MX', { style: 'currency', currency: 'MXN', minimumFractionDigits: 0 });
-
-// --- Crear Contexto ---
 const CartContext = createContext();
 
-// --- Hook personalizado para usar el contexto ---
-export const useCart = () => {
-  return useContext(CartContext);
-};
+export const useCart = () => useContext(CartContext);
 
-// --- Proveedor del Contexto ---
 export const CartProvider = ({ children }) => {
-  const [cartItems, setCartItems] = useState([]);
+  const [cartItems, setCartItems] = useState(() => {
+    const storedCart = Cookies.get('cartItems');
+    return storedCart ? JSON.parse(storedCart) : [];
+  });
   const [notification, setNotification] = useState('');
-  const [isCartOpen, setIsCartOpen] = useState(false); // Estado para visibilidad del carrito
+  const [isCartOpen, setIsCartOpen] = useState(false);
 
-  // --- Limpiar notificación después de un tiempo ---
   useEffect(() => {
     if (notification) {
       const timer = setTimeout(() => {
         setNotification('');
-      }, 3000); // Oculta después de 3 segundos
+      }, 3000);
       return () => clearTimeout(timer);
     }
   }, [notification]);
 
-  // --- Funciones del Carrito ---
-  const addToCart = useCallback((productToAdd) => {
-    setCartItems(prevItems => {
-      const existingItem = prevItems.find(item => item.name === productToAdd.name);
-      if (existingItem) {
-        return prevItems.map(item =>
-          item.name === productToAdd.name
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
-        );
-      } else {
-        return [...prevItems, { ...productToAdd, quantity: 1 }];
+  useEffect(() => {
+    Cookies.set('cartItems', JSON.stringify(cartItems), { expires: 7 });
+  }, [cartItems]);
+
+  const getNumericPrice = useCallback((priceData, quantity = 1) => {
+    if (typeof priceData === 'string') {
+      try {
+        return parseFloat(priceData.replace(/[^0-9.-]+/g, "").replace('.', ''));
+      } catch (e) {
+        return 0;
       }
-    });
-    setNotification(`${productToAdd.name} añadido al carrito!`); // Muestra notificación
+    } else if (Array.isArray(priceData) && priceData.length > 0) {
+      let applicableTier = priceData[0];
+      for (let i = priceData.length - 1; i >= 0; i--) {
+        if (quantity >= priceData[i].quantity) {
+          applicableTier = priceData[i];
+          break;
+        }
+      }
+      return applicableTier.pricePerUnit;
+    }
+    return 0;
   }, []);
 
-  const removeFromCart = useCallback((productName) => {
+  const formatMXN = useCallback(value =>
+    value.toLocaleString('es-MX', {
+      style: 'currency',
+      currency: 'MXN',
+      minimumFractionDigits: 0,
+    }),
+    []
+  );
+
+  const addToCart = useCallback(
+    productToAdd => {
+      setCartItems(prevItems => {
+        const existingItem = prevItems.find(item => item.name === productToAdd.name);
+        if (existingItem) {
+          return prevItems.map(item =>
+            item.name === productToAdd.name
+              ? { ...item, quantity: item.quantity + 1 }
+              : item
+          );
+        } else {
+          return [...prevItems, { ...productToAdd, quantity: 1 }];
+        }
+      });
+      setNotification(`${productToAdd.name} añadido al carrito!`);
+    },
+    []
+  );
+
+  const removeFromCart = useCallback(productName => {
     setCartItems(prevItems => prevItems.filter(item => item.name !== productName));
   }, []);
 
@@ -79,14 +90,12 @@ export const CartProvider = ({ children }) => {
     );
   }, []);
 
-  // --- Cálculos derivados ---
   const itemCount = cartItems.reduce((count, item) => count + item.quantity, 0);
   const cartTotal = cartItems.reduce((total, item) => {
     const pricePerUnit = getNumericPrice(item.pricingTiers || item.price, item.quantity);
-    return total + (pricePerUnit * item.quantity);
+    return total + pricePerUnit * item.quantity;
   }, 0);
 
-  // --- Valor proporcionado por el contexto ---
   const value = {
     cartItems,
     addToCart,
@@ -94,11 +103,11 @@ export const CartProvider = ({ children }) => {
     updateQuantity,
     itemCount,
     cartTotal,
-    getNumericPrice, // Exporta helpers si son necesarios fuera
+    getNumericPrice,
     formatMXN,
-    notification, // Exporta notificación
-    isCartOpen,   // Exporta estado de visibilidad
-    setIsCartOpen // Exporta función para cambiar visibilidad
+    notification,
+    isCartOpen,
+    setIsCartOpen,
   };
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

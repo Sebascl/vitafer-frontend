@@ -15,6 +15,11 @@ const ShoppingCart = () => {
 
   const [showCheckout, setShowCheckout] = useState(false);
 
+  // Función para manejar la cancelación desde el formulario
+  const handleCancelCheckout = () => {
+    setShowCheckout(false);
+  };
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-70 z-50 flex justify-center items-start pt-10 md:pt-20 overflow-y-auto">
        <div className="bg-gray-800 rounded-lg shadow-xl w-full max-w-3xl mx-4 my-8 p-6 relative text-white">
@@ -26,18 +31,19 @@ const ShoppingCart = () => {
              &times;
           </button>
 
-          {/* Título cambia según la vista */}
           <h2 className="text-3xl font-bold text-center mb-2 text-white">
             {showCheckout ? 'Checkout' : '🛒 Tu Carrito'}
           </h2>
 
           {showCheckout ? (
             <>
-              <button onClick={() => setShowCheckout(false)} className="text-yellow-400 hover:text-yellow-300 mb-4 text-sm">&larr; Volver al carrito</button>
+              {/* El botón para volver ahora está dentro de CheckoutForm,
+                  pero podría haber otro aquí si quisieras */}
               <CheckoutForm
                   cartItems={cartItems}
                   cartTotal={cartTotal}
                   formatPrice={formatMXN}
+                  onCancel={handleCancelCheckout} // Pasa la función como prop
               />
             </>
           ) : (
@@ -47,7 +53,6 @@ const ShoppingCart = () => {
                 <p className="text-center text-gray-400 mt-8 text-lg">Tu carrito está vacío.</p>
               ) : (
                 <div className="space-y-6">
-                  {/* Mapeo de items (sin cambios) */}
                   {cartItems.map((item) => {
                     const itemPrice = getNumericPrice(item.pricingTiers || item.price, item.quantity);
                     const totalItemPrice = itemPrice * item.quantity;
@@ -74,7 +79,6 @@ const ShoppingCart = () => {
                      </div>
                     );
                   })}
-                  {/* Total y Botón para ir al checkout */}
                   <div className="text-right mt-6 pt-6 border-t border-gray-700">
                     <h3 className="text-2xl font-bold mb-4">Total: {formatMXN(cartTotal)}</h3>
                     <button
