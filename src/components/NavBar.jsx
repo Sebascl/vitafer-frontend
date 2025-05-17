@@ -74,8 +74,8 @@ const NavBar = () => {
            </nav>
 
            <a
-             href="#contact"
-             onClick={(e) => handleLinkClick(e, '#contact')}
+             href="#skills"
+             onClick={(e) => handleLinkClick(e, '#skills')}
              className="hidden lg:inline-block bg-yellow-500 text-black px-6 py-3 rounded-full hover:bg-yellow-600 transition-all duration-300 shadow-lg hover:shadow-yellow-500/50 transform hover:scale-105 font-semibold"
            >
              Siente el poder de Vitafer
@@ -160,9 +160,9 @@ const NavBar = () => {
               </a>
             ))}
             <a
-              href="#contact"
+              href="#skills"
               className="mt-6 bg-yellow-500 text-black px-8 py-4 rounded-full text-xl font-semibold hover:bg-yellow-600 transition-all duration-300 shadow-lg hover:shadow-yellow-500/50 transform hover:scale-105"
-              onClick={(e) => handleLinkClick(e, '#contact', setMenuOpen)}
+              onClick={(e) => handleLinkClick(e, '#skills', setMenuOpen)}
             >
               Siente el poder de Vitafer
             </a>

@@ -1,5 +1,6 @@
-import React from 'react';
-import { CartProvider, useCart } from './context/CartContext'; // Asegúrate que la ruta sea correcta
+import React, { useEffect } from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { CartProvider, useCart } from './context/CartContext';
 
 import Testimonials from "./sections/Testimonials";
 import Footer from "./sections/Footer";
@@ -8,38 +9,80 @@ import TechStack from "./sections/TechStack";
 import Experience from "./sections/Experience";
 import Hero from "./sections/Hero";
 import ShowcaseSection from "./sections/ShowcaseSection";
-import LogoShowcase from "./sections/LogoShowcase";
-import FeatureCards from "./sections/FeatureCards";
-import NavBar from "./components/NavBar"; // Corregido el nombre si era Navbar
+import NavBar from "./components/NavBar";
 import AnimatedCounter from "./components/AnimatedCounter";
-import ShoppingCart from './components/ShoppingCart'; // Importa el carrito
+import ShoppingCart from './components/ShoppingCart';
+import PaymentSuccessPage from './pages/PaymentSuccesPage'; // Nota: El nombre del archivo tiene "SuccesPage"
+import PaymentFailurePage from './pages/PaymentFailurePage';
+import PaymentPendingPage from './pages/PaymentPendingPage';
+import DispatcherLoginPage from './pages/DispatcherLoginPage';
+import DispatcherOrdersPage from './pages/DispatcherOrdersPage';
+
+const MainPageLayout = () => (
+    <>
+      <Hero />
+      <ShowcaseSection />
+      <Experience /> 
+      <TechStack /> 
+      <Testimonials />
+      <AnimatedCounter />
+      <Contact />
+    </>
+);
+
+const ProtectedDispatcherRoute = ({ children }) => {
+    const { dispatcher } = useCart();
+    if (!dispatcher) {
+        return <Navigate to="/dispatcher-login" replace />;
+    }
+    return children;
+};
 
 function AppContent() {
-  const { isCartOpen } = useCart(); // Obtiene el estado de visibilidad del carrito
+  const { isCartOpen } = useCart();
 
   return (
     <>
       <NavBar />
-      <main> {/* Envuelve el contenido principal si quieres */}
-        <Hero />
-        <ShowcaseSection />
-        <Experience />
-        <TechStack />
-        <Testimonials />
-        <AnimatedCounter />
-        <Contact />
+      <main className="pt-20 md:pt-24">
+        <Routes>
+          <Route path="/" element={<MainPageLayout />} />
+          <Route path="/payment-success" element={<PaymentSuccessPage />} />
+          <Route path="/payment-failure" element={<PaymentFailurePage />} />
+          <Route path="/payment-pending" element={<PaymentPendingPage />} />
+          <Route path="/dispatcher-login" element={<DispatcherLoginPage />} />
+          <Route 
+            path="/dispatcher/orders" 
+            element={
+              <ProtectedDispatcherRoute>
+                <DispatcherOrdersPage />
+              </ProtectedDispatcherRoute>
+            } 
+          />
+        </Routes>
       </main>
       <Footer />
-
       {isCartOpen && <ShoppingCart />}
     </>
   );
 }
 
-const App = () => (
-  <CartProvider>
-    <AppContent />
-  </CartProvider>
-);
+const App = () => {
+  useEffect(() => {
+    const queryParams = new URLSearchParams(window.location.search);
+    const refCode = queryParams.get('ref');
+    if (refCode) {
+      localStorage.setItem('referralCode', refCode);
+    }
+  }, []);
+
+  return (
+    <BrowserRouter>
+      <CartProvider>
+        <AppContent />
+      </CartProvider>
+    </BrowserRouter>
+  );
+};
 
 export default App;

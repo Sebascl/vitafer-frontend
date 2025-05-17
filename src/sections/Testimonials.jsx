@@ -59,7 +59,7 @@ const TestimonialsSensual = () => {
 
   return (
     <section
-      id="experiencias"
+      id="testimonials"
       ref={sectionRef}
       className="bg-gradient-to-b from-black via-amber-950/20 to-black text-white py-6 px-6 md:px-10 lg:px-16 mt-15"
     >
