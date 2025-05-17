@@ -109,7 +109,7 @@ const vitaferProducts = [
     modelPath: "/images/vitafer-bottle.png",
     scale: 2.5,
     rotation: [0, 0, 0],
-    price: "$ 1.000",
+    price: "$ 1.050",
     presentation: "Frasco de 500 mL",
     description:
       "El clásico multivitamínico líquido que enciende tu energía. Ideal para el rendimiento diario y la resistencia sexual. 💪🔥",
@@ -119,7 +119,7 @@ const vitaferProducts = [
     modelPath: "/images/sachet.png",
     scale: 3,
     rotation: [0, 0, 0],
-    price: "$ 800",
+    price: "$ 850",
     presentation: "Display x 16 unds de 10mL",
     description:
       "Potencia en formato práctico. Llévalo contigo y recárgate cuando quieras. Ideal para encuentros espontáneos. 😉💧",
@@ -129,7 +129,7 @@ const vitaferProducts = [
     modelPath: "/images/bottles-pack.png",
     scale: 3,
     rotation: [0, 0, 0],
-    price: "$ 1.500",
+    price: "$ 1570",
     presentation: "Display x 24 unds de 20mL",
     description:
       "La dosis explosiva para noches inolvidables. Siente la vitalidad, el placer y la potencia en cada trago. 🍷🔥",
@@ -143,7 +143,7 @@ const vitaferOffers = [
     scale: 2.5,
     rotation: [0, 0, 0],
     pricingTiers: [
-      { quantity: 1, pricePerUnit: 12350 },
+      { quantity: 1, pricePerUnit: 12515 },
       { quantity: 5, pricePerUnit: 10000 }
     ],
     unitDescription: "por caja",
@@ -157,7 +157,7 @@ const vitaferOffers = [
     scale: 3,
     rotation: [0, 0, 0],
     pricingTiers: [ 
-      { quantity: 1, pricePerUnit: 12350 }
+      { quantity: 1, pricePerUnit: 12515 }
     ],
     unitDescription: "",
     presentation: "Paquete Mayorista: 12 Displays (288 Shots de 20mL en total)",
