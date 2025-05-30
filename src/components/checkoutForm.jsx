@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useCart } from '../context/CartContext';
-import { initMercadoPago } from '@mercadopago/sdk-react';
+import { initMercadoPago } from '@mercadopago/sdk-react'; // Wallet ya no se usa aquí directamente
 
 const mercadoPagoPublicKey = import.meta.env.VITE_MERCADOPAGO_PUBLIC_KEY;
 
@@ -10,7 +10,7 @@ if (mercadoPagoPublicKey) {
   console.warn("Advertencia: La Public Key de MercadoPago no está configurada en las variables de entorno.");
 }
 
-const CheckoutForm = ({ cartItems, cartTotal, onCancel }) => {
+const CheckoutForm = ({ cartItems, cartTotal }) => {
   const [formData, setFormData] = useState({
     name: '', email: '', phone: '', address: '', city: '', state: '', postalCode: '',
   });
@@ -35,10 +35,11 @@ const CheckoutForm = ({ cartItems, cartTotal, onCancel }) => {
     const orderData = {
       customerDetails: formData,
       items: cartItems.map(item => ({
+        id: item.id,
         name: item.name,
         quantity: item.quantity,
         unit_price: getNumericPrice(item.pricingTiers || item.price, item.quantity),
-        presentation: item.presentation,
+        presentation: item.presentation, 
       })),
       totalAmount: cartTotal,
       referralCode: referralCode || undefined,
@@ -65,8 +66,6 @@ const CheckoutForm = ({ cartItems, cartTotal, onCancel }) => {
       const result = await response.json();
 
       if (result.mercadoPagoUrl) {
-        // Opcional: Limpiar el código de referido después de un intento de pago exitoso (o en la página de éxito)
-        // localStorage.removeItem('referralCode');
         window.location.href = result.mercadoPagoUrl;
       } else {
         throw new Error('No se recibió la URL de pago del servidor.');
@@ -112,7 +111,7 @@ const CheckoutForm = ({ cartItems, cartTotal, onCancel }) => {
         </div>
       </div>
 
-      {error && <p className="text-red-500 text-sm text-center">{error}</p>}
+      {error && <p className="text-red-500 text-sm text-center py-2">{error}</p>}
 
       <div className="text-center pt-4">
         <button

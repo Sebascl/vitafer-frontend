@@ -1,41 +1,50 @@
-// src/sections/TechStack.jsx
 import React, { useEffect } from "react";
-// import { Link } from 'react-router-dom'; // Link ahora está en ProductCard
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import TitleHeader from "../components/TitleHeader";
-import { vitaferProducts, vitaferOffers } from "../constants"; 
-// import { useCart } from '../context/CartContext'; // Las funciones del carrito ahora se usan en ProductCard
-import ProductCard from '../components/ProductCard'; // <-- IMPORTA ProductCard
+import { useCart } from '../context/CartContext'; // IMPORTA useCart para acceder al stock
+import ProductCard from '../components/ProductCard';
 
 gsap.registerPlugin(ScrollTrigger);
 
 const TechStack = () => {
-  // const { formatMXN, getNumericPrice } = useCart(); // Ya no se necesita aquí directamente
+  const { allProductsWithStock, isLoadingProducts } = useCart(); // OBTÉN productos con stock
+
+  // Separa los productos y ofertas después de obtenerlos del contexto
+  const vitaferProducts = allProductsWithStock.filter(p => p.id && !p.name.toLowerCase().includes('mayoreo'));
+  const vitaferOffers = allProductsWithStock.filter(p => p.id && p.name.toLowerCase().includes('mayoreo'));
 
   useEffect(() => {
-    const floatLayers = gsap.utils.toArray(".card-float-layer"); // Esta clase está en ProductCard ahora
-    const fadeIn = gsap.fromTo(
-        floatLayers, { opacity: 0, y: -20 },
-        { opacity: 1, y: 0, duration: 1, ease: "power2.out", stagger: 0.15, scrollTrigger: { trigger: "#skills", start: "top 70%", once: true } }
-    );
-    floatLayers.forEach((card, i) => {
-        gsap.set(card, { willChange: "transform" });
-        const floatAnim = gsap.to(card, { y: "+=20", boxShadow: "0 0 40px rgba(255, 255, 0, 0.1)", duration: 1.8 + Math.random() * 0.4, ease: "sine.inOut", repeat: -1, yoyo: true, delay: i * 0.15, paused: true });
-        ScrollTrigger.create({ trigger: card, start: "top bottom-=100", end: "bottom top+=100", onEnter: () => floatAnim.play(), onLeave: () => floatAnim.pause(), onEnterBack: () => floatAnim.play(), onLeaveBack: () => floatAnim.pause() });
-    });
-    return () => {
-        fadeIn.kill();
-        ScrollTrigger.getAll().forEach((st) => st.kill());
-        gsap.killTweensOf(".card-float-layer");
-    };
-  }, []);
+    // Solo ejecuta GSAP si los productos han cargado y hay algo que animar
+    if (!isLoadingProducts && allProductsWithStock.length > 0) {
+      const floatLayers = gsap.utils.toArray(".card-float-layer");
+      if (floatLayers.length === 0) return; // No hay nada que animar
+
+      const fadeIn = gsap.fromTo(
+          floatLayers, { opacity: 0, y: -20 },
+          { opacity: 1, y: 0, duration: 1, ease: "power2.out", stagger: 0.15, scrollTrigger: { trigger: "#skills", start: "top 70%", once: true } }
+      );
+      floatLayers.forEach((card, i) => {
+          gsap.set(card, { willChange: "transform" });
+          const floatAnim = gsap.to(card, { y: "+=20", boxShadow: "0 0 40px rgba(255, 255, 0, 0.1)", duration: 1.8 + Math.random() * 0.4, ease: "sine.inOut", repeat: -1, yoyo: true, delay: i * 0.15, paused: true });
+          ScrollTrigger.create({ trigger: card, start: "top bottom-=100", end: "bottom top+=100", onEnter: () => floatAnim.play(), onLeave: () => floatAnim.pause(), onEnterBack: () => floatAnim.play(), onLeaveBack: () => floatAnim.pause() });
+      });
+      return () => {
+          fadeIn.kill();
+          ScrollTrigger.getAll().forEach((st) => st.kill());
+          gsap.killTweensOf(".card-float-layer");
+      };
+    }
+  }, [isLoadingProducts, allProductsWithStock]); // Depende de estos estados
 
   const today = new Date();
   const days = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
   const months = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
   const promoDateString = `${days[today.getDay()]} ${today.getDate()} de ${months[today.getMonth()]}`;
 
+  if (isLoadingProducts) {
+    return <div className="min-h-screen flex items-center justify-center bg-black text-white text-xl">Cargando nuestros elixires...</div>;
+  }
 
   return (
     <div id="skills" className="flex-center section-padding bg-black text-white overflow-hidden py-10">
@@ -49,13 +58,13 @@ const TechStack = () => {
         </div>
 
         <div className="grid md:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-6 md:gap-9 mt-12">
-          {vitaferProducts.map(item => <ProductCard key={item.name} item={item} />)}
+          {vitaferProducts.map(item => <ProductCard key={item.id || item.name} item={item} />)}
         </div>
 
         <div className="mt-16 md:mt-20">
           <TitleHeader title="🛍️ Ofertas al Por Mayor" sub="Precios especiales para compras en volumen. ¡Ideal para revendedores!"/>
           <div className="grid md:grid-cols-2 sm:grid-cols-1 grid-cols-1 gap-6 md:gap-9 mt-12">
-            {vitaferOffers.map(item => <ProductCard key={item.name} item={item} />)}
+            {vitaferOffers.map(item => <ProductCard key={item.id || item.name} item={item} />)}
           </div>
         </div>
       </div>
