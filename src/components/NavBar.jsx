@@ -1,30 +1,58 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate, useLocation, Link as RouterLink } from 'react-router-dom'; // Importa useNavigate, useLocation y Link
 import { useCart } from '../context/CartContext';
 import { navLinks } from "../constants";
-import { Menu, X, ShoppingCart as CartIcon } from "lucide-react"; // Importa icono de carrito
-
-const handleLinkClick = (e, link, setMenuOpen) => {
-  e.preventDefault();
-  const targetElement = document.querySelector(link);
-  if (targetElement) {
-    const offsetTop = targetElement.offsetTop - 100;
-    window.scrollTo({ top: offsetTop, behavior: "smooth" });
-  }
-  if (setMenuOpen) { // Asegúrate que setMenuOpen exista (para clics fuera del menú móvil)
-      setMenuOpen(false);
-      document.body.style.overflow = "auto";
-  }
-};
+import { Menu, X, ShoppingCart as CartIcon } from "lucide-react";
 
 const NavBar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const { itemCount, isCartOpen, setIsCartOpen, notification } = useCart(); // Usa el contexto
+  const { itemCount, isCartOpen, setIsCartOpen, notification } = useCart();
+  
+  const navigate = useNavigate(); // Hook para navegación programática
+  const location = useLocation(); // Hook para obtener la ruta actual
 
   const handleToggleCart = () => {
-    setIsCartOpen(!isCartOpen); // Abre/cierra el carrito
-    setMenuOpen(false); // Cierra el menú móvil si está abierto
+    setIsCartOpen(!isCartOpen);
+    setMenuOpen(false);
   };
+
+  const handleLinkClick = (e, hashTarget, closeMobileMenu = false) => {
+    e.preventDefault();
+    const targetId = hashTarget.substring(1); // Remueve el '#' para obtener el ID
+
+    if (location.pathname === "/") {
+      // Ya estamos en la página principal, hacer scroll suave
+      const targetElement = document.getElementById(targetId);
+      if (targetElement) {
+        const offsetTop = targetElement.offsetTop - 80; // Ajusta este offset según la altura de tu navbar
+        window.scrollTo({ top: offsetTop, behavior: "smooth" });
+      }
+    } else {
+      // No estamos en la página principal, navegar a ella y luego al ancla
+      navigate(`/${hashTarget}`); // React Router se encarga de navegar y el navegador del ancla
+    }
+
+    if (closeMobileMenu && setMenuOpen) {
+      setMenuOpen(false);
+      document.body.style.overflow = "auto";
+    }
+  };
+
+  useEffect(() => {
+    // Efecto para hacer scroll al ancla si venimos de otra página
+    if (location.hash) {
+        const id = location.hash.substring(1);
+        setTimeout(() => { // Timeout para dar tiempo a que el DOM se actualice
+            const element = document.getElementById(id);
+            if (element) {
+                const offsetTop = element.offsetTop - 80; // Ajusta este offset
+                window.scrollTo({ top: offsetTop, behavior: 'smooth' });
+            }
+        }, 100); // Pequeño delay
+    }
+  }, [location]); // Se ejecuta cuando cambia la ubicación (incluyendo el hash)
+
 
   useEffect(() => {
     const handleScroll = () => {
@@ -35,7 +63,7 @@ const NavBar = () => {
   }, []);
 
   useEffect(() => {
-    document.body.style.overflow = menuOpen || isCartOpen ? "hidden" : "auto"; // Bloquea scroll si menú o carrito están abiertos
+    document.body.style.overflow = menuOpen || isCartOpen ? "hidden" : "auto";
     return () => {
       document.body.style.overflow = "auto";
     };
@@ -43,45 +71,44 @@ const NavBar = () => {
 
   return (
     <header
-      className={`fixed top-0 w-full z-40 transition-all duration-300 ease-in-out ${ // Reducido z-index a 40 para que el carrito (z-50) esté por encima
+      className={`fixed top-0 w-full z-40 transition-all duration-300 ease-in-out ${
         scrolled
           ? "bg-black/80 backdrop-blur-md shadow-lg border-b border-amber-500/30"
           : "bg-transparent"
       }`}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex justify-between items-center relative"> {/* Añadido relative */}
-        <a href="#hero" className="flex items-center flex-shrink-0 group" onClick={(e) => handleLinkClick(e, '#hero')}>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex justify-between items-center relative">
+        {/* Logo ahora usa handleLinkClick si estás en la home, o Link de Router si no */}
+        <RouterLink to="/#hero" className="flex items-center flex-shrink-0 group" onClick={(e) => handleLinkClick(e, '#hero')}>
           <img
             src="/images/vitafer-logo.png"
             alt="Vitafer Logo"
-            className="h-12 md:h-16 lg:h-20 w-auto transition-opacity duration-300 group-hover:opacity-90" // Ajustado tamaño y transición
+            className="h-12 md:h-16 lg:h-20 w-auto transition-opacity duration-300 group-hover:opacity-90"
           />
-        </a>
+        </RouterLink>
 
-        {/* Contenedor para Nav, Botón CTA, Carrito y Menú hamburguesa */}
         <div className="flex items-center space-x-4">
            <nav className="hidden md:flex items-center space-x-6 lg:space-x-8">
              {navLinks.map(({ name, link }) => (
-               <a
+               <RouterLink // Usa RouterLink para la navegación base
                  key={name}
-                 href={link}
+                 to={`/${link}`} // Navega a la raíz + hash
                  className="text-yellow-500 hover:text-yellow-400 font-semibold transition-colors"
-                 onClick={(e) => handleLinkClick(e, link)}
+                 onClick={(e) => handleLinkClick(e, link)} // handleLinkClick maneja el scroll y previene default
                >
                  {name}
-               </a>
+               </RouterLink>
              ))}
            </nav>
 
-           <a
-             href="#skills"
-             onClick={(e) => handleLinkClick(e, '#skills')}
+           <RouterLink // Usa RouterLink para la navegación base
+             to="/#skills" // Navega a la raíz + hash
              className="hidden lg:inline-block bg-yellow-500 text-black px-6 py-3 rounded-full hover:bg-yellow-600 transition-all duration-300 shadow-lg hover:shadow-yellow-500/50 transform hover:scale-105 font-semibold"
+             onClick={(e) => handleLinkClick(e, '#skills')} // handleLinkClick maneja el scroll
            >
              Siente el poder de Vitafer
-           </a>
+           </RouterLink>
 
-           {/* Botón del Carrito */}
            <div className="relative">
                <button
                  onClick={handleToggleCart}
@@ -95,8 +122,6 @@ const NavBar = () => {
                    </span>
                  )}
                </button>
-
-                {/* Notificación */}
                 {notification && (
                   <div className="absolute top-full right-0 mt-2 w-max max-w-xs sm:max-w-sm bg-green-600 text-white px-3 py-1 rounded text-sm shadow-lg animate-fade-in-out z-50">
                      {notification}
@@ -104,37 +129,31 @@ const NavBar = () => {
                 )}
            </div>
 
-
-           {/* Botón Menú Móvil */}
            <button
              className="md:hidden text-amber-400 focus:outline-none hover:text-amber-300 transition-colors"
              onClick={() => {
                  setMenuOpen(!menuOpen);
-                 setIsCartOpen(false); // Cierra carrito si abre menú
+                 setIsCartOpen(false);
              }}
              aria-label={menuOpen ? "Cerrar menú" : "Abrir menú"}
            >
              {menuOpen ? <X size={28} /> : <Menu size={28} />}
            </button>
         </div>
-
       </div>
 
-        {/* CSS para la animación de notificación */}
-        <style>{`
-         @keyframes fade-in-out {
-           0% { opacity: 0; transform: translateY(-10px); }
-           15% { opacity: 1; transform: translateY(0); }
-           85% { opacity: 1; transform: translateY(0); }
-           100% { opacity: 0; transform: translateY(-10px); }
-         }
-         .animate-fade-in-out {
-           animation: fade-in-out 3s ease-in-out forwards;
-         }
-        `}</style>
+      <style>{`
+       @keyframes fade-in-out {
+         0% { opacity: 0; transform: translateY(-10px); }
+         15% { opacity: 1; transform: translateY(0); }
+         85% { opacity: 1; transform: translateY(0); }
+         100% { opacity: 0; transform: translateY(-10px); }
+       }
+       .animate-fade-in-out {
+         animation: fade-in-out 3s ease-in-out forwards;
+       }
+      `}</style>
 
-
-      {/* Menú Móvil */}
       {menuOpen && (
         <div className="fixed top-0 left-0 w-full h-screen z-40 bg-black/90 backdrop-blur-sm flex items-center justify-center transition-all duration-300 animate-fade-in">
           <button
@@ -147,25 +166,24 @@ const NavBar = () => {
           >
             <X size={36} />
           </button>
-
           <nav className="flex flex-col items-center space-y-8 text-center animate-scale-in">
             {navLinks.map(({ name, link }) => (
-              <a
+              <RouterLink // Usa RouterLink aquí también
                 key={name}
-                href={link}
+                to={`/${link}`} // Navega a la raíz + hash
                 className="text-yellow-500 text-2xl font-bold hover:text-yellow-400 transition-colors"
-                onClick={(e) => handleLinkClick(e, link, setMenuOpen)}
+                onClick={(e) => handleLinkClick(e, link, true)} // Pasa true para cerrar menú móvil
               >
                 {name}
-              </a>
+              </RouterLink>
             ))}
-            <a
-              href="#skills"
+            <RouterLink // Usa RouterLink
+              to="/#skills"
               className="mt-6 bg-yellow-500 text-black px-8 py-4 rounded-full text-xl font-semibold hover:bg-yellow-600 transition-all duration-300 shadow-lg hover:shadow-yellow-500/50 transform hover:scale-105"
-              onClick={(e) => handleLinkClick(e, '#skills', setMenuOpen)}
+              onClick={(e) => handleLinkClick(e, '#skills', true)} // Pasa true para cerrar menú móvil
             >
               Siente el poder de Vitafer
-            </a>
+            </RouterLink>
           </nav>
         </div>
       )}

@@ -1,23 +1,20 @@
-import React, { useEffect, useContext } from "react"; // Añade useContext
+// src/sections/TechStack.jsx
+import React, { useEffect } from "react";
+// import { Link } from 'react-router-dom'; // Link ahora está en ProductCard
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import TitleHeader from "../components/TitleHeader";
-// Importa el hook useCart en lugar de useState directo
-import { useCart } from '../context/CartContext'; // Ajusta la ruta
-import { vitaferProducts, vitaferOffers } from "../constants";
+import { vitaferProducts, vitaferOffers } from "../constants"; 
+// import { useCart } from '../context/CartContext'; // Las funciones del carrito ahora se usan en ProductCard
+import ProductCard from '../components/ProductCard'; // <-- IMPORTA ProductCard
 
 gsap.registerPlugin(ScrollTrigger);
 
-// Mueve los helpers fuera o impórtalos si los moviste a utils.jsx
-const formatMXN = (value) => value.toLocaleString('es-MX', { style: 'currency', currency: 'MXN', minimumFractionDigits: 0 });
-
 const TechStack = () => {
-  // Obtiene sólo la función necesaria del contexto
-  const { addToCart, getNumericPrice } = useCart(); // Obtiene getNumericPrice también
+  // const { formatMXN, getNumericPrice } = useCart(); // Ya no se necesita aquí directamente
 
-  // useEffect de animación no cambia
   useEffect(() => {
-    const floatLayers = gsap.utils.toArray(".card-float-layer");
+    const floatLayers = gsap.utils.toArray(".card-float-layer"); // Esta clase está en ProductCard ahora
     const fadeIn = gsap.fromTo(
         floatLayers, { opacity: 0, y: -20 },
         { opacity: 1, y: 0, duration: 1, ease: "power2.out", stagger: 0.15, scrollTrigger: { trigger: "#skills", start: "top 70%", once: true } }
@@ -32,64 +29,13 @@ const TechStack = () => {
         ScrollTrigger.getAll().forEach((st) => st.kill());
         gsap.killTweensOf(".card-float-layer");
     };
-  }, []); // Ya no necesita depender de los productos si no cambian dinámicamente
+  }, []);
 
   const today = new Date();
   const days = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
   const months = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
   const promoDateString = `${days[today.getDay()]} ${today.getDate()} de ${months[today.getMonth()]}`;
 
-  // renderProductCard ahora usa addToCart del contexto
-  const renderProductCard = (item) => {
-     let priceDisplay;
-     if (item.pricingTiers && item.pricingTiers.length > 0) {
-       const baseTier = item.pricingTiers.find(tier => tier.quantity === 1) || item.pricingTiers[0];
-       const discountTier = item.pricingTiers.find(tier => tier.quantity > 1);
-       const unitDesc = item.unitDescription || "";
-       priceDisplay = (
-         <div className="mt-2">
-           <p className="text-2xl font-extrabold text-white">
-              {formatMXN(baseTier.pricePerUnit)} <span className="text-lg font-medium text-white/80">{unitDesc}</span>
-           </p>
-           {discountTier && (
-             <p className="text-sm font-semibold text-yellow-300 mt-1">
-               ¡{formatMXN(discountTier.pricePerUnit)} c/u llevando {discountTier.quantity} o más!
-             </p>
-           )}
-         </div>
-       );
-     } else if (item.price) {
-        // Formatear también el precio simple si es un string como "$ 1.000"
-        const numericSimplePrice = getNumericPrice(item.price); // Usa helper
-        priceDisplay = ( <p className="text-2xl font-extrabold text-white mt-2">{numericSimplePrice > 0 ? formatMXN(numericSimplePrice) : item.price}</p> );
-     } else {
-        priceDisplay = ( <p className="text-lg font-semibold text-white/70 mt-2">Consultar precio</p> );
-     }
-
-    return (
-      <div key={item.name} className="tech-card">
-        <div className="card-float-layer bg-gradient-to-br from-yellow-400/10 to-pink-500/10 backdrop-blur-xl p-6 rounded-3xl border border-yellow-400/30 shadow-2xl hover:scale-105 transition-transform duration-300 h-full flex flex-col">
-          <div className="mb-5 flex justify-center items-center w-full h-48 md:h-56 lg:h-64 rounded-xl overflow-hidden bg-black/60 border border-yellow-400/30 shadow-inner">
-            <img src={item.modelPath} alt={item.name} className="object-contain object-center h-full max-h-[90%] w-auto" loading="lazy"/>
-          </div>
-          <div className="text-center space-y-2 flex-grow flex flex-col justify-between">
-            <div>
-              <h3 className="text-xl md:text-2xl font-bold text-yellow-300 drop-shadow-md">{item.name}</h3>
-              <p className="text-sm text-pink-100 italic leading-relaxed mt-1 mb-2">{item.description}</p>
-              <p className="text-base text-white/80 font-medium">{item.presentation}</p>
-              {priceDisplay}
-            </div>
-            <button
-               onClick={() => addToCart(item)}
-               className="mt-4 inline-block px-5 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-full font-semibold tracking-wide shadow-lg transition-all"
-            >
-              Añadir al Carrito 🛒
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  };
 
   return (
     <div id="skills" className="flex-center section-padding bg-black text-white overflow-hidden py-10">
@@ -102,17 +48,16 @@ const TechStack = () => {
            <p className="mt-3 text-xs font-medium text-white/90">¡Date prisa, que la pasión no espera! 🔥</p>
         </div>
 
-        <div className="grid md:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-9 mt-12">
-          {vitaferProducts.map(renderProductCard)}
+        <div className="grid md:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-6 md:gap-9 mt-12">
+          {vitaferProducts.map(item => <ProductCard key={item.name} item={item} />)}
         </div>
 
-        <div className="mt-20">
+        <div className="mt-16 md:mt-20">
           <TitleHeader title="🛍️ Ofertas al Por Mayor" sub="Precios especiales para compras en volumen. ¡Ideal para revendedores!"/>
-          <div className="grid md:grid-cols-2 sm:grid-cols-1 grid-cols-1 gap-9 mt-12">
-            {vitaferOffers.map(renderProductCard)}
+          <div className="grid md:grid-cols-2 sm:grid-cols-1 grid-cols-1 gap-6 md:gap-9 mt-12">
+            {vitaferOffers.map(item => <ProductCard key={item.name} item={item} />)}
           </div>
         </div>
-        {/* El carrito ya no se renderiza aquí */}
       </div>
     </div>
   );

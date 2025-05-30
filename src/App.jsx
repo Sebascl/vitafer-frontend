@@ -12,18 +12,19 @@ import ShowcaseSection from "./sections/ShowcaseSection";
 import NavBar from "./components/NavBar";
 import AnimatedCounter from "./components/AnimatedCounter";
 import ShoppingCart from './components/ShoppingCart';
-import PaymentSuccessPage from './pages/PaymentSuccesPage'; // Nota: El nombre del archivo tiene "SuccesPage"
+import PaymentSuccessPage from './pages/PaymentSuccesPage';
 import PaymentFailurePage from './pages/PaymentFailurePage';
 import PaymentPendingPage from './pages/PaymentPendingPage';
 import DispatcherLoginPage from './pages/DispatcherLoginPage';
 import DispatcherOrdersPage from './pages/DispatcherOrdersPage';
+import ProductDetailPage from './pages/ProductDetailPage';
 
 const MainPageLayout = () => (
     <>
       <Hero />
       <ShowcaseSection />
       <Experience /> 
-      <TechStack /> 
+      <TechStack />
       <Testimonials />
       <AnimatedCounter />
       <Contact />
@@ -41,12 +42,21 @@ const ProtectedDispatcherRoute = ({ children }) => {
 function AppContent() {
   const { isCartOpen } = useCart();
 
+  useEffect(() => {
+    const queryParams = new URLSearchParams(window.location.search);
+    const refCode = queryParams.get('ref');
+    if (refCode) {
+      localStorage.setItem('referralCode', refCode);
+    }
+  }, []);
+
   return (
     <>
       <NavBar />
       <main className="pt-20 md:pt-24">
         <Routes>
           <Route path="/" element={<MainPageLayout />} />
+          <Route path="/producto/:productName" element={<ProductDetailPage />} />
           <Route path="/payment-success" element={<PaymentSuccessPage />} />
           <Route path="/payment-failure" element={<PaymentFailurePage />} />
           <Route path="/payment-pending" element={<PaymentPendingPage />} />
@@ -67,22 +77,12 @@ function AppContent() {
   );
 }
 
-const App = () => {
-  useEffect(() => {
-    const queryParams = new URLSearchParams(window.location.search);
-    const refCode = queryParams.get('ref');
-    if (refCode) {
-      localStorage.setItem('referralCode', refCode);
-    }
-  }, []);
-
-  return (
-    <BrowserRouter>
-      <CartProvider>
-        <AppContent />
-      </CartProvider>
-    </BrowserRouter>
-  );
-};
+const App = () => (
+  <BrowserRouter>
+    <CartProvider>
+      <AppContent />
+    </CartProvider>
+  </BrowserRouter>
+);
 
 export default App;
