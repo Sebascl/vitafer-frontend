@@ -243,6 +243,57 @@ const vitaferOffers = [
   },
 ];
 
+const fatherDayPromos = [
+  {
+    id: "promo-papa-2x500ml",
+    name: "🎁 Pack Dúo Papá: 2 Vitafer-L 500mL",
+    modelPath: "/images/musculoso-2.png", // Necesitarás una imagen para este pack
+    price: "$ 1.690", // Precio de la promoción como string
+    priceNumber: 1690, // Precio numérico
+    presentation: "Oferta: 2 Frascos de Vitafer-L 500mL",
+    description: "¡El regalo perfecto para papá! Doble energía y vitalidad a un precio especial.",
+    detailedDescription: "Este Día del Padre, regala potencia y bienestar con nuestro Pack Dúo de Vitafer-L 500mL. Dos frascos de nuestra fórmula clásica para asegurar que papá tenga la energía que necesita para todos sus días y noches. Una oferta que no puedes dejar pasar.",
+    ingredients: commonIngredients,
+    usageInstructions: "Ver modo de uso del frasco individual Vitafer-L 500mL. Cada frasco sigue las indicaciones estándar.",
+    benefits: [...commonBenefits, "Ahorro especial por el Día del Padre."],
+    warnings: commonWarnings,
+    category: "Promociones Papá",
+    sku: "VTF-PAPA-PACK2"
+  },
+  {
+    id: "promo-papa-3x500ml",
+    name: "💪 Super Pack Papá: 3 Vitafer-L 500mL",
+    modelPath: "/images/musculoso-3.png", // Necesitarás una imagen para este pack
+    price: "$ 2.100",
+    priceNumber: 2100,
+    presentation: "Oferta: 3 Frascos de Vitafer-L 500mL",
+    description: "¡Más potencia para el rey de la casa! Triplica los beneficios y el ahorro con este súper pack.",
+    detailedDescription: "Sorprende a papá con el Super Pack de 3 frascos de Vitafer-L 500mL. La fórmula que ya conoce y ama, ahora en una presentación que asegura vitalidad prolongada. Ideal para un tratamiento completo o para compartir su secreto de energía.",
+    ingredients: commonIngredients,
+    usageInstructions: "Ver modo de uso del frasco individual Vitafer-L 500mL. Cada frasco sigue las indicaciones estándar.",
+    benefits: [...commonBenefits, "Excelente relación cantidad-precio.", "Ideal para un tratamiento sostenido."],
+    warnings: commonWarnings,
+    category: "Promociones Papá",
+    sku: "VTF-PAPA-PACK3"
+  },
+  {
+    id: "promo-papa-10x500ml",
+    name: "🏆 Mega Pack Papá: 10 Vitafer-L 500mL",
+    modelPath: "/images/musculoso-10.png", // Necesitarás una imagen para este pack
+    price: "$ 5.500",
+    priceNumber: 5500,
+    presentation: "Oferta: 10 Frascos de Vitafer-L 500mL",
+    description: "¡Para el papá campeón! El Mega Pack para una reserva de energía y vitalidad insuperable a un precio excepcional.",
+    detailedDescription: "El regalo definitivo para el Día del Padre. Con 10 frascos de Vitafer-L 500mL, este Mega Pack es la inversión perfecta en bienestar y rendimiento. Asegura meses de energía y vitalidad con un ahorro significativo. ¡No hay mejor manera de decir 'Te quiero, Papá!'",
+    ingredients: commonIngredients,
+    usageInstructions: "Ver modo de uso del frasco individual Vitafer-L 500mL. Cada frasco sigue las indicaciones estándar.",
+    benefits: [...commonBenefits, "Máximo ahorro por volumen.", "Suministro prolongado para bienestar constante."],
+    warnings: commonWarnings,
+    category: "Promociones Papá",
+    sku: "VTF-PAPA-PACK10"
+  }
+];
+
 const expCards = [
   {
     title: "Energía Que Excita",
@@ -387,4 +438,5 @@ export {
   vitaferOffers,
   techStackImgs,
   navLinks,
+  fatherDayPromos,
 };

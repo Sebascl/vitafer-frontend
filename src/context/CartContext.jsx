@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, createContext, useContext } from 'react';
 import Cookies from 'js-cookie';
-import { vitaferProducts as baseVitaferProducts, vitaferOffers as baseVitaferOffers } from '../constants'; // Importa tus datos base
+import { vitaferProducts as baseVitaferProducts, vitaferOffers as baseVitaferOffers, fatherDayPromos as baseFatherDayPromos } from '../constants'; // Importa tus datos base
 
 const CartContext = createContext();
 
@@ -25,7 +25,7 @@ export const CartProvider = ({ children }) => {
 
   const fetchStockAndMergeProducts = useCallback(async () => {
     setIsLoadingProducts(true);
-    const localProductData = [...baseVitaferProducts, ...baseVitaferOffers];
+    const localProductData = [...baseVitaferProducts, ...baseVitaferOffers, ...baseFatherDayPromos]; 
     const productIds = localProductData.map(p => p.id).filter(Boolean);
 
     if (productIds.length === 0) {
