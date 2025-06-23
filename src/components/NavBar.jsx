@@ -106,7 +106,7 @@ const NavBar = () => {
              className="hidden lg:inline-block bg-yellow-500 text-black px-6 py-3 rounded-full hover:bg-yellow-600 transition-all duration-300 shadow-lg hover:shadow-yellow-500/50 transform hover:scale-105 font-semibold"
              onClick={(e) => handleLinkClick(e, '#skills')} // handleLinkClick maneja el scroll
            >
-             Promos para papá
+             Liquidacion 50%
            </RouterLink>
 
            <div className="relative">
@@ -182,7 +182,7 @@ const NavBar = () => {
               className="mt-6 bg-yellow-500 text-black px-8 py-4 rounded-full text-xl font-semibold hover:bg-yellow-600 transition-all duration-300 shadow-lg hover:shadow-yellow-500/50 transform hover:scale-105"
               onClick={(e) => handleLinkClick(e, '#skills', true)} // Pasa true para cerrar menú móvil
             >
-              Promos para papá
+              Liquidacion 50%
             </RouterLink>
           </nav>
         </div>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, createContext, useContext } from 'react';
 import Cookies from 'js-cookie';
-import { vitaferProducts as baseVitaferProducts, vitaferOffers as baseVitaferOffers, fatherDayPromos as baseFatherDayPromos } from '../constants'; // Importa tus datos base
+import { vitaferProducts as baseVitaferProducts, vitaferOffers as baseVitaferOffers } from '../constants';
 
 const CartContext = createContext();
 
@@ -25,20 +25,20 @@ export const CartProvider = ({ children }) => {
 
   const fetchStockAndMergeProducts = useCallback(async () => {
     setIsLoadingProducts(true);
-    const localProductData = [...baseVitaferProducts, ...baseVitaferOffers, ...baseFatherDayPromos]; 
+    const localProductData = [...baseVitaferProducts, ...baseVitaferOffers];
     const productIds = localProductData.map(p => p.id).filter(Boolean);
 
     if (productIds.length === 0) {
-        setAllProductsWithStock(localProductData.map(p => ({...p, stock: 0})));
-        setIsLoadingProducts(false);
-        return;
+      setAllProductsWithStock(localProductData.map(p => ({ ...p, stock: 0 })));
+      setIsLoadingProducts(false);
+      return;
     }
 
     if (!backendApiUrl) {
-        console.error("VITE_BACKEND_API_URL no está configurada en el frontend. No se puede cargar el stock.");
-        setAllProductsWithStock(localProductData.map(p => ({ ...p, stock: 0 }))); // Fallback
-        setIsLoadingProducts(false);
-        return;
+      console.error("VITE_BACKEND_API_URL no está configurada en el frontend. No se puede cargar el stock.");
+      setAllProductsWithStock(localProductData.map(p => ({ ...p, stock: 0 })));
+      setIsLoadingProducts(false);
+      return;
     }
 
     try {
@@ -51,7 +51,7 @@ export const CartProvider = ({ children }) => {
         const errData = await response.json().catch(() => ({}));
         throw new Error(errData.message || 'No se pudo cargar el stock de los productos');
       }
-      
+
       const stockMap = await response.json();
 
       const mergedProducts = localProductData.map(p => ({
@@ -73,8 +73,8 @@ export const CartProvider = ({ children }) => {
   }, [fetchStockAndMergeProducts]);
 
   useEffect(() => { if (notification) { const timer = setTimeout(() => setNotification(''), 3000); return () => clearTimeout(timer); } }, [notification]);
-  useEffect(() => { try { Cookies.set('cartItems', JSON.stringify(cartItems), { expires: 7 }); } catch (e) { console.error("Error saving cart to cookies", e);}}, [cartItems]);
-  useEffect(() => { try { if (dispatcher) { localStorage.setItem('dispatcher', JSON.stringify(dispatcher)); } else { localStorage.removeItem('dispatcher'); } } catch (e) { console.error("Error saving dispatcher to localStorage", e);}}, [dispatcher]);
+  useEffect(() => { try { Cookies.set('cartItems', JSON.stringify(cartItems), { expires: 7 }); } catch (e) { console.error("Error saving cart to cookies", e); } }, [cartItems]);
+  useEffect(() => { try { if (dispatcher) { localStorage.setItem('dispatcher', JSON.stringify(dispatcher)); } else { localStorage.removeItem('dispatcher'); } } catch (e) { console.error("Error saving dispatcher to localStorage", e); } }, [dispatcher]);
 
   const getNumericPrice = useCallback((priceData, quantity = 1) => {
     if (typeof priceData === 'string') {
@@ -87,7 +87,7 @@ export const CartProvider = ({ children }) => {
     return 0;
   }, []);
 
-  const formatMXN = useCallback(value => typeof value === 'number' ? value.toLocaleString('es-MX', { style: 'currency', currency: 'MXN', minimumFractionDigits: 0 }) : '$0' , []);
+  const formatMXN = useCallback(value => typeof value === 'number' ? value.toLocaleString('es-MX', { style: 'currency', currency: 'MXN', minimumFractionDigits: 0 }) : '$0', []);
 
   const addToCart = useCallback(
     (productToAdd, quantityToAdd = 1) => {
@@ -98,8 +98,8 @@ export const CartProvider = ({ children }) => {
         return;
       }
       if (productWithStock.stock <= 0) {
-          setNotification(`${productToAdd.name} está agotado.`);
-          return;
+        setNotification(`${productToAdd.name} está agotado.`);
+        return;
       }
 
       setCartItems(prevItems => {
@@ -108,9 +108,6 @@ export const CartProvider = ({ children }) => {
 
         if (productWithStock.stock < currentCartQuantity + quantityToAdd) {
           setNotification(`Stock insuficiente para ${productToAdd.name}. Disponible: ${productWithStock.stock}. En carrito: ${currentCartQuantity}. Intentas añadir: ${quantityToAdd}.`);
-          // Opcional: Añadir solo lo disponible
-          // const availableToAdd = productWithStock.stock - currentCartQuantity;
-          // if (availableToAdd > 0) { /* lógica para añadir availableToAdd */ }
           return prevItems;
         }
 
@@ -121,8 +118,6 @@ export const CartProvider = ({ children }) => {
               : item
           );
         } else {
-          // Al añadir nuevo, guardamos una copia del producto con su stock actual por si acaso,
-          // aunque la verificación principal siempre debe ser contra allProductsWithStock
           return [...prevItems, { ...productToAdd, quantity: quantityToAdd, currentStockSnapshot: productWithStock.stock }];
         }
       });
@@ -131,38 +126,38 @@ export const CartProvider = ({ children }) => {
     [allProductsWithStock, setNotification]
   );
 
-  const removeFromCart = useCallback(productId => { // Cambiado a productId
+  const removeFromCart = useCallback(productId => {
     setCartItems(prevItems => prevItems.filter(item => item.id !== productId));
   }, []);
 
   const updateQuantity = useCallback((productId, amount) => {
     setCartItems(prevItems => {
-        const itemInCart = prevItems.find(item => item.id === productId);
-        if (!itemInCart) return prevItems;
+      const itemInCart = prevItems.find(item => item.id === productId);
+      if (!itemInCart) return prevItems;
 
-        const productWithStock = allProductsWithStock.find(p => p.id === productId);
-        if (!productWithStock) { // El producto ya no existe en el catálogo con stock
-            setNotification(`El producto ${itemInCart.name} ya no está disponible.`);
-            return prevItems.filter(item => item.id !== productId); // Eliminar del carrito
-        }
+      const productWithStock = allProductsWithStock.find(p => p.id === productId);
+      if (!productWithStock) {
+        setNotification(`El producto ${itemInCart.name} ya no está disponible.`);
+        return prevItems.filter(item => item.id !== productId);
+      }
 
-        let newQuantity = itemInCart.quantity + amount;
+      let newQuantity = itemInCart.quantity + amount;
 
-        if (amount > 0 && newQuantity > productWithStock.stock) {
-            setNotification(`No puedes añadir más de ${itemInCart.name}. Stock disponible: ${productWithStock.stock}.`);
-            newQuantity = productWithStock.stock; // Ajusta a máximo stock
-        }
-        
-        newQuantity = Math.max(0, newQuantity); // Asegura que no sea negativo
+      if (amount > 0 && newQuantity > productWithStock.stock) {
+        setNotification(`No puedes añadir más de ${itemInCart.name}. Stock disponible: ${productWithStock.stock}.`);
+        newQuantity = productWithStock.stock;
+      }
 
-        if (newQuantity === 0) {
-            return prevItems.filter(item => item.id !== productId);
-        } else {
-            return prevItems.map(item => item.id === productId ? { ...item, quantity: newQuantity } : item);
-        }
+      newQuantity = Math.max(0, newQuantity);
+
+      if (newQuantity === 0) {
+        return prevItems.filter(item => item.id !== productId);
+      } else {
+        return prevItems.map(item => item.id === productId ? { ...item, quantity: newQuantity } : item);
+      }
     });
   }, [allProductsWithStock, setNotification]);
-  
+
   const clearCart = useCallback(() => { setCartItems([]); }, []);
 
   const loginDispatcher = useCallback(async (username, password) => {
@@ -182,10 +177,10 @@ export const CartProvider = ({ children }) => {
     cartItems, addToCart, removeFromCart, updateQuantity,
     itemCount: cartItems.reduce((sum, item) => sum + item.quantity, 0),
     cartTotal: cartItems.reduce((total, item) => {
-        const productData = allProductsWithStock.find(p => p.id === item.id);
-        if (!productData) return total;
-        const pricePerUnit = getNumericPrice(productData.pricingTiers || productData.price, item.quantity);
-        return total + (pricePerUnit * item.quantity);
+      const productData = allProductsWithStock.find(p => p.id === item.id);
+      if (!productData) return total;
+      const pricePerUnit = getNumericPrice(productData.pricingTiers || productData.price, item.quantity);
+      return total + (pricePerUnit * item.quantity);
     }, 0),
     getNumericPrice, formatMXN, notification, setNotification,
     isCartOpen, setIsCartOpen, clearCart,
