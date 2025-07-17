@@ -60,7 +60,7 @@ const Hero = () => {
             </p>
 
             <Button
-              text="Compra con 50%"
+              text="Compra Ahora!"
               className="md:w-80 md:h-16 w-80 h-12 hero-button"
               id="counter"
             />
