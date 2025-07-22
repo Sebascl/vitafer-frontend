@@ -170,7 +170,7 @@ const vitaferProducts = [
     rotation: [0, 0, 0],
     price: "$ 1830",
     presentation: "Pack de 2 Frascos de 500 mL c/u",
-    description: "¡Duplica la potencia y ahorra! Lleva dos frascos de Vitafer-L para un suministro prolongado de energía y vitalidad. お得な情報",
+    description: "¡Duplica la potencia y ahorra! Lleva dos frascos de Vitafer-L para un suministro prolongado de energía y vitalidad. 💪🔥",
     detailedDescription: "Aprovecha nuestro pack de dos frascos de Vitafer-L 500mL. Ideal para parejas o para quienes desean asegurar su vitalidad por más tiempo. Mantén la consistencia en tu suplementación y disfruta de un mejor precio por unidad. La misma fórmula potente, doble beneficio.",
     ingredients: commonIngredients,
     usageInstructions: "Adultos: Tomar una (1) copa dosificadora (aproximadamente 10mL a 20mL) una (1) vez al día. Para un efecto potenciador, tomar 30-60 minutos antes de la actividad física. Agítese bien antes de usar.",
