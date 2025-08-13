@@ -7,7 +7,7 @@ const ProductCard = ({ item }) => {
   const [quantity, setQuantity] = useState(1);
   const currentStock = item.stock !== undefined ? item.stock : 0;
 
-  const handleDirectQuantityInputChange = (e) => {
+    const handleDirectQuantityInputChange = (e) => {
     let newQuantity = parseInt(e.target.value, 10);
     if (isNaN(newQuantity)) {
       setQuantity('');
@@ -75,7 +75,7 @@ const ProductCard = ({ item }) => {
     return (
       <div className="mt-1 sm:mt-2 flex flex-col items-center justify-center">
         {numericOriginalPrice > 0 && (
-          <span className="text-base sm:text-lg font-medium text-gray-400/90 line-through decoration-2">
+          <span className="text-base sm:text-lg font-medium text-gray-400/90 line-through decoration-red-500 decoration-2">
             {formatMXN(numericOriginalPrice)}
           </span>
         )}
@@ -85,9 +85,9 @@ const ProductCard = ({ item }) => {
       </div>
     );
   };
-  
+
   if (item.pricingTiers && item.pricingTiers.length > 0) {
-    const baseTier = item.pricingTiers.find(tier => tier.quantity === 1) || item.pricingTiers[0];
+        const baseTier = item.pricingTiers.find(tier => tier.quantity === 1) || item.pricingTiers[0];
     const currentQuantityForTier = (typeof quantity === 'number' && !isNaN(quantity) && quantity > 0) ? quantity : 1;
     const tierForCurrentQuantity = item.pricingTiers.slice().reverse().find(t => currentQuantityForTier >= t.quantity) || baseTier;
     unitPriceForCalculation = tierForCurrentQuantity.pricePerUnit;
@@ -120,15 +120,23 @@ const ProductCard = ({ item }) => {
     unitPriceForCalculation = 0;
     priceDisplay = (<p className="text-lg font-semibold text-white/70 mt-1 sm:mt-2">Consultar precio</p>);
   }
-  
+
   const currentQuantityForTotal = (typeof quantity === 'number' && !isNaN(quantity) && quantity > 0) ? quantity : 1;
   const quickAddTotal = currentQuantityForTotal * unitPriceForCalculation;
 
+  const cardBorderClass = item.isPromo ? "border-yellow-400/80 hover:shadow-yellow-400/40" : "border-blue-500/60 hover:shadow-cyan-400/30";
+  const cardBgClass = item.isPromo ? "from-yellow-900/20 via-black/50 to-orange-900/20" : "from-blue-600/30 via-black/50 to-blue-800/30";
+
   return (
-    <div className="tech-card h-full">
-      <div className="card-float-layer bg-gradient-to-br from-blue-600/30 via-black/50 to-blue-800/30 backdrop-blur-xl p-4 sm:p-6 rounded-3xl border-2 border-blue-500/60 shadow-2xl hover:shadow-cyan-400/30 transition-all duration-300 h-full flex flex-col">
+    <div className="tech-card h-full relative">
+      {item.isPromo && (
+        <div className="absolute top-3 right-3 bg-red-600 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg z-10 animate-bounce">
+          ¡OFERTA!
+        </div>
+      )}
+      <div className={`card-float-layer bg-gradient-to-br ${cardBgClass} backdrop-blur-xl p-4 sm:p-6 rounded-3xl border-2 ${cardBorderClass} shadow-2xl transition-all duration-300 h-full flex flex-col`}>
         <Link to={`/producto/${encodeURIComponent(item.id || item.name)}`} className="block mb-4 group">
-          <div className="flex justify-center items-center w-full h-40 sm:h-48 md:h-56 rounded-xl overflow-hidden bg-black/60 border border-blue-600/50 shadow-inner cursor-pointer transform transition-transform duration-300 group-hover:scale-105">
+          <div className="flex justify-center items-center w-full h-40 sm:h-48 md:h-56 rounded-xl overflow-hidden bg-black/60 border border-gray-700 shadow-inner cursor-pointer transform transition-transform duration-300 group-hover:scale-105">
             <img src={item.modelPath} alt={item.name} className="object-contain h-full max-h-[90%] w-auto p-2" loading="lazy" />
           </div>
         </Link>
@@ -141,10 +149,10 @@ const ProductCard = ({ item }) => {
             <p className="text-sm sm:text-base text-white/80 font-medium mt-1 sm:mt-2">{item.presentation}</p>
             {priceDisplay}
             {currentStock <= 0 && (
-              <p className="text-red-400 font-bold my-2 text-base sm:text-lg uppercase">AGOTADO</p> // Mantenemos rojo para "AGOTADO" por ser una alerta universal
+              <p className="text-red-400 font-bold my-2 text-base sm:text-lg uppercase">AGOTADO</p>
             )}
             {currentStock > 0 && currentStock <= 10 && (
-              <p className="text-orange-400 font-semibold my-2 text-sm">¡SOLO QUEDAN {currentStock}!</p> // Naranja para urgencia es efectivo
+              <p className="text-orange-400 font-semibold my-2 text-sm">¡SOLO QUEDAN {currentStock}!</p>
             )}
           </div>
 
