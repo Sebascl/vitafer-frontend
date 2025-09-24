@@ -2,10 +2,10 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 
-const DispatcherOrdersPage = () => {
+const DispatcherDashboardPage = () => {
   const [pendingOrders, setPendingOrders] = useState([]);
   const [shippedOrders, setShippedOrders] = useState([]);
-  const [isLoadingOrders, setIsLoadingOrders] = useState(true); // Específico para órdenes
+  const [isLoadingOrders, setIsLoadingOrders] = useState(true);
   const [ordersError, setOrdersError] = useState('');
   
   const { 
@@ -20,30 +20,23 @@ const DispatcherOrdersPage = () => {
   const navigate = useNavigate();
   const backendApiUrl = import.meta.env.VITE_BACKEND_API_URL;
 
-  const [activeTab, setActiveTab] = useState('orders'); // 'orders' o 'inventory'
-
+  const [activeTab, setActiveTab] = useState('orders');
   const [stockInputs, setStockInputs] = useState({});
   const [isUpdatingStock, setIsUpdatingStock] = useState(null);
   const [stockError, setStockError] = useState('');
 
   const fetchOrders = useCallback(async () => {
-    if (!dispatcher || activeTab !== 'orders') return; // Solo carga órdenes si la pestaña es de órdenes
+    if (!dispatcher || activeTab !== 'orders') return;
     setIsLoadingOrders(true);
     setOrdersError(''); 
     try {
       const pendingResponse = await fetch(`${backendApiUrl}/api/dispatcher/orders/pending`);
-      if (!pendingResponse.ok) {
-        const errData = await pendingResponse.json().catch(() => ({}));
-        throw new Error(errData.message || 'Error al cargar órdenes pendientes');
-      }
+      if (!pendingResponse.ok) { const errData = await pendingResponse.json().catch(() => ({})); throw new Error(errData.message || 'Error al cargar órdenes pendientes'); }
       const pendingData = await pendingResponse.json();
       setPendingOrders(pendingData);
 
       const shippedResponse = await fetch(`${backendApiUrl}/api/dispatcher/orders/shipped`);
-      if (!shippedResponse.ok) {
-        const errData = await shippedResponse.json().catch(() => ({}));
-        throw new Error(errData.message || 'Error al cargar órdenes despachadas');
-      }
+      if (!shippedResponse.ok) { const errData = await shippedResponse.json().catch(() => ({})); throw new Error(errData.message || 'Error al cargar órdenes despachadas'); }
       const shippedData = await shippedResponse.json();
       setShippedOrders(shippedData);
     } catch (err) {
@@ -62,7 +55,6 @@ const DispatcherOrdersPage = () => {
       if (activeTab === 'orders') {
         fetchOrders();
       }
-      // Inicializa/actualiza los inputs de stock cuando los productos con stock cambian o se cargan
       if (allProductsWithStock.length > 0) {
         const initialInputs = {};
         allProductsWithStock.forEach(p => {
@@ -80,7 +72,7 @@ const DispatcherOrdersPage = () => {
   const handleUpdateStock = async (productId, currentInputStock, productName) => {
     const newStock = parseInt(currentInputStock, 10);
     if (isNaN(newStock) || newStock < 0) {
-      alert("Por favor, ingresa un número válido para el stock (mayor o igual a 0).");
+      alert("Por favor, ingresa un número válido para el stock.");
       const product = allProductsWithStock.find(p => (p.id || p.name) === productId);
       if (product) setStockInputs(prev => ({ ...prev, [productId]: product.stock.toString() }));
       return;
@@ -95,6 +87,7 @@ const DispatcherOrdersPage = () => {
       });
       const responseData = await response.json();
       if (!response.ok) throw new Error(responseData.message || 'Error al actualizar el stock');
+      
       alert(`Stock para "${productName}" actualizado a ${newStock}`);
       if (refreshProductsStock) refreshProductsStock();
     } catch (err) {
@@ -113,14 +106,9 @@ const DispatcherOrdersPage = () => {
     setOrdersError('');
     try {
       const response = await fetch(`${backendApiUrl}/api/dispatcher/order/${orderId}/dispatch`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json', },
-        body: JSON.stringify({ trackingNumber: trackingNumber || undefined })
+        method: 'PUT', headers: { 'Content-Type': 'application/json', }, body: JSON.stringify({ trackingNumber: trackingNumber || undefined })
       });
-      if (!response.ok) {
-        const errData = await response.json().catch(() => ({}));
-        throw new Error(errData.message || 'Error al marcar como despachada');
-      }
+      if (!response.ok) { const errData = await response.json().catch(() => ({})); throw new Error(errData.message || 'Error al marcar como despachada'); }
       await fetchOrders();
     } catch (err) {
       setOrdersError(err.message || 'Fallo al actualizar la orden.');
@@ -133,14 +121,8 @@ const DispatcherOrdersPage = () => {
     setIsLoadingOrders(true);
     setOrdersError('');
     try {
-        const response = await fetch(`${backendApiUrl}/api/dispatcher/order/${orderId}/unship`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json', },
-        });
-        if (!response.ok) {
-            const errData = await response.json().catch(() => ({}));
-            throw new Error(errData.message || 'Error al revertir el despacho');
-        }
+        const response = await fetch(`${backendApiUrl}/api/dispatcher/order/${orderId}/unship`, { method: 'PUT', headers: { 'Content-Type': 'application/json', }, });
+        if (!response.ok) { const errData = await response.json().catch(() => ({})); throw new Error(errData.message || 'Error al revertir el despacho'); }
         await fetchOrders();
     } catch (err) {
         setOrdersError(err.message || 'Fallo al actualizar la orden.');
@@ -154,30 +136,16 @@ const DispatcherOrdersPage = () => {
     <div key={order._id} className="bg-gray-800 p-6 rounded-xl shadow-lg border border-gray-700 flex flex-col justify-between">
       <div>
         <h2 className="text-xl font-semibold text-yellow-500 mb-2">Orden #{order._id ? order._id.slice(-6) : 'N/A'}</h2>
-        <p className="text-sm text-gray-400 mb-1">Fecha Pedido: {new Date(order.createdAt).toLocaleDateString()} {new Date(order.createdAt).toLocaleTimeString()}</p>
-        {order.shippedAt && <p className="text-sm text-green-400 mb-1">Fecha Despacho: {new Date(order.shippedAt).toLocaleDateString()} {new Date(order.shippedAt).toLocaleTimeString()}</p>}
+        <p className="text-sm text-gray-400 mb-1">Fecha Pedido: {new Date(order.createdAt).toLocaleString()}</p>
+        {order.shippedAt && <p className="text-sm text-green-400 mb-1">Fecha Despacho: {new Date(order.shippedAt).toLocaleString()}</p>}
         <p className="text-sm text-gray-400 mb-3">Total: <span className="font-bold">{formatMXN ? formatMXN(order.totalAmount) : `$${order.totalAmount}`}</span></p>
         <p className="text-sm text-gray-400 mb-3">Estado: <span className={`font-semibold ${order.status === 'paid' ? 'text-green-400' : order.status === 'shipped' ? 'text-blue-400' : 'text-red-400'}`}>{order.status}</span></p>
         {order.referredByEmployeeName ? ( <div className="mb-3 pt-2 border-t border-gray-700 mt-2"> <h4 className="font-medium text-gray-200">Vendido por:</h4> <p className="text-sm text-green-400 font-semibold">{order.referredByEmployeeName}</p> </div>
         ) : order.referralCode ? ( <div className="mb-3 pt-2 border-t border-gray-700 mt-2"> <h4 className="font-medium text-gray-200">Cód. Referido:</h4> <p className="text-sm text-gray-300 font-semibold">{order.referralCode}</p> </div>
         ) : null}
-        <div className="mb-3">
-          <h4 className="font-medium text-gray-200">Cliente:</h4>
-          <p className="text-sm text-gray-300">{order.customerDetails.name}</p>
-          <p className="text-sm text-gray-300">{order.customerDetails.email}</p>
-          <p className="text-sm text-gray-300">{order.customerDetails.phone}</p>
-        </div>
-        <div className="mb-4">
-          <h4 className="font-medium text-gray-200">Dirección de Envío:</h4>
-          <p className="text-sm text-gray-300">{order.customerDetails.address}</p>
-          <p className="text-sm text-gray-300">{order.customerDetails.city}, {order.customerDetails.state} - {order.customerDetails.postalCode}</p>
-        </div>
-        <div className="mb-4">
-            <h4 className="font-medium text-gray-200 mb-1">Productos:</h4>
-            <ul className="list-disc list-inside space-y-1 pl-1">
-                {order.items.map((item, index) => ( <li key={index} className="text-sm text-gray-300"> {item.quantity} x {item.name} ({item.presentation}) </li> ))}
-            </ul>
-        </div>
+        <div className="mb-3"> <h4 className="font-medium text-gray-200">Cliente:</h4> <p className="text-sm text-gray-300">{order.customerDetails.name}</p> <p className="text-sm text-gray-300">{order.customerDetails.email}</p> <p className="text-sm text-gray-300">{order.customerDetails.phone}</p> </div>
+        <div className="mb-4"> <h4 className="font-medium text-gray-200">Dirección de Envío:</h4> <p className="text-sm text-gray-300">{order.customerDetails.address}</p> <p className="text-sm text-gray-300">{order.customerDetails.city}, {order.customerDetails.state} - {order.customerDetails.postalCode}</p> </div>
+        <div className="mb-4"> <h4 className="font-medium text-gray-200 mb-1">Productos:</h4> <ul className="list-disc list-inside space-y-1 pl-1"> {order.items.map((item, index) => ( <li key={index} className="text-sm text-gray-300"> {item.quantity} x {item.name} ({item.presentation}) </li> ))} </ul> </div>
         {order.shippingDetails?.trackingNumber && ( <div className="mb-4"> <h4 className="font-medium text-gray-200">Nº Seguimiento:</h4> <p className="text-sm text-yellow-400 font-semibold">{order.shippingDetails.trackingNumber}</p> </div> )}
       </div>
       <div className="mt-4 space-y-2">
@@ -199,26 +167,24 @@ const DispatcherOrdersPage = () => {
           )}
         </div>
 
-        {/* Pestañas de Navegación */}
-        <div className="mb-8 flex space-x-2 sm:space-x-4 border-b-2 border-gray-700 pb-2">
+        <div className="mb-8 flex space-x-2 sm:space-x-4 border-b-2 border-gray-700">
           <button
             onClick={() => setActiveTab('orders')}
-            className={`py-2 px-3 sm:px-4 rounded-t-lg text-sm sm:text-base font-semibold transition-colors ${activeTab === 'orders' ? 'bg-gray-700 text-yellow-300' : 'text-gray-400 hover:text-yellow-200 hover:bg-gray-800/50'}`}
+            className={`py-2 px-3 sm:px-4 rounded-t-lg text-sm sm:text-base font-semibold transition-colors ${activeTab === 'orders' ? 'bg-gray-700 text-yellow-300 border-b-2 border-transparent' : 'text-gray-400 hover:text-yellow-200 hover:bg-gray-800/50'}`}
           >
             Gestionar Órdenes
           </button>
           <button
             onClick={() => setActiveTab('inventory')}
-            className={`py-2 px-3 sm:px-4 rounded-t-lg text-sm sm:text-base font-semibold transition-colors ${activeTab === 'inventory' ? 'bg-gray-700 text-yellow-300' : 'text-gray-400 hover:text-yellow-200 hover:bg-gray-800/50'}`}
+            className={`py-2 px-3 sm:px-4 rounded-t-lg text-sm sm:text-base font-semibold transition-colors ${activeTab === 'inventory' ? 'bg-gray-700 text-yellow-300 border-b-2 border-transparent' : 'text-gray-400 hover:text-yellow-200 hover:bg-gray-800/50'}`}
           >
             Gestionar Inventario
           </button>
         </div>
 
-        {/* Contenido de la Pestaña Activa */}
         {activeTab === 'orders' && (
           <>
-            {isLoadingOrders && pendingOrders.length === 0 && shippedOrders.length === 0 ? (
+            {isLoadingOrders ? (
               <p className="text-center text-gray-400 text-lg py-10">Cargando órdenes...</p>
             ) : ordersError ? (
               <p className="text-red-500 bg-red-900/50 p-3 rounded-md text-center mb-6">{ordersError}</p>
@@ -226,14 +192,14 @@ const DispatcherOrdersPage = () => {
               <>
                 <section className="mb-12">
                   <h2 className="text-xl sm:text-2xl font-semibold text-yellow-300 border-b-2 border-yellow-600 pb-2 mb-6">Pendientes de Envío ({pendingOrders.length})</h2>
-                  {!isLoadingOrders && pendingOrders.length === 0 && <p className="text-gray-400">No hay órdenes pendientes.</p>}
+                  {pendingOrders.length === 0 && !isLoadingOrders && <p className="text-gray-400">No hay órdenes pendientes.</p>}
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {pendingOrders.map(order => renderOrderCard(order, true))}
                   </div>
                 </section>
                 <section>
                   <h2 className="text-xl sm:text-2xl font-semibold text-gray-300 border-b-2 border-gray-700 pb-2 mb-6">Envíos Realizados ({shippedOrders.length})</h2>
-                  {!isLoadingOrders && shippedOrders.length === 0 && <p className="text-gray-400">No hay órdenes despachadas.</p>}
+                  {shippedOrders.length === 0 && !isLoadingOrders && <p className="text-gray-400">No hay órdenes despachadas.</p>}
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {shippedOrders.map(order => renderOrderCard(order, false))}
                   </div>
@@ -246,7 +212,7 @@ const DispatcherOrdersPage = () => {
         {activeTab === 'inventory' && (
           <section>
             <h2 className="text-xl sm:text-2xl font-semibold text-teal-300 border-b-2 border-teal-600 pb-2 mb-6">Inventario de Productos</h2>
-            {isLoadingProducts && allProductsWithStock.length === 0 ? (
+            {isLoadingProducts ? (
               <p className="text-gray-400">Cargando inventario...</p>
             ) : stockError ? (
               <p className="text-red-500 bg-red-900/50 p-3 rounded-md text-center">{stockError}</p>
@@ -276,7 +242,7 @@ const DispatcherOrdersPage = () => {
                         />
                         <button 
                           onClick={() => handleUpdateStock(currentProdId, stockInputs[currentProdId], product.name)}
-                          disabled={isUpdatingStock === currentProdId || stockInputs[currentProdId] === undefined || stockInputs[currentProdId] === '' || parseInt(stockInputs[currentProdId]) === product.stock}
+                          disabled={isUpdatingStock === currentProdId || stockInputs[currentProdId] === undefined || stockInputs[currentProdId] === '' || parseInt(stockInputs[currentProdId], 10) === product.stock}
                           className="w-full mt-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold py-2 px-3 rounded-md disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                         >
                           {isUpdatingStock === currentProdId ? 'Actualizando...' : 'Guardar Stock'}
@@ -294,4 +260,4 @@ const DispatcherOrdersPage = () => {
   );
 };
 
-export default DispatcherOrdersPage; // O DispatcherDashboardPage si lo renombras
+export default DispatcherDashboardPage;
