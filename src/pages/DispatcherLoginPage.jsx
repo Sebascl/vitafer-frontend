@@ -16,7 +16,7 @@ const DispatcherLoginPage = () => {
     setError('');
     try {
       await loginDispatcher(username, password);
-      navigate('/dispatcher/orders');
+      navigate('/dispatcher/dashboard');
     } catch (err) {
       setError(err.message || 'Fallo el inicio de sesión. Verifica tus credenciales.');
     } finally {
