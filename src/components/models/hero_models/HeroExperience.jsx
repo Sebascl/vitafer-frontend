@@ -1,6 +1,5 @@
 import { Canvas } from "@react-three/fiber";
 import { useMediaQuery } from "react-responsive";
-import Particles from "./Particles";
 import { Suspense, useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 
@@ -10,10 +9,20 @@ const HeroExperience = () => {
   const videoRef = useRef(null);
   const interactionListenerAttached = useRef(false);
 
+  const videoSources = [
+    "/images/video1.mp4",
+    "/images/video2.mp4",
+    "/images/video3.mp4",
+    "/images/video4.mp4",
+    "/images/video5.mp4",
+    "/images/video6.mp4",
+  ];
+
+  const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
+
   useEffect(() => {
     const video = document.createElement("video");
-    video.src = "/images/video1.mp4";
-    video.loop = true;
+    video.src = videoSources[currentVideoIndex];
     video.muted = true;
     video.setAttribute('playsinline', 'true');
     video.crossOrigin = 'anonymous';
@@ -23,28 +32,34 @@ const HeroExperience = () => {
     texture.minFilter = THREE.LinearFilter;
     texture.magFilter = THREE.LinearFilter;
     texture.format = THREE.RGBAFormat;
+    texture.colorSpace = THREE.SRGBColorSpace;
     setVideoTexture(texture);
+    
+    const playNextVideo = () => {
+        setCurrentVideoIndex(prevIndex => (prevIndex + 1) % videoSources.length);
+    };
+    
+    video.addEventListener('ended', playNextVideo);
 
     const attemptPlay = () => {
        if (videoRef.current && videoRef.current.paused) {
-          videoRef.current.play().catch(error => {
-             console.warn("Autoplay/Play prevented:", error);
-             if (!interactionListenerAttached.current && error.name === "NotAllowedError") {
-                 const handleFirstInteraction = () => {
-                     attemptPlay(); // Reintenta reproducir en la primera interacción
-                     window.removeEventListener('click', handleFirstInteraction, true);
-                     window.removeEventListener('touchstart', handleFirstInteraction, true);
-                     interactionListenerAttached.current = false;
-                 };
-                 window.addEventListener('click', handleFirstInteraction, { once: true, capture: true });
-                 window.addEventListener('touchstart', handleFirstInteraction, { once: true, capture: true });
-                 interactionListenerAttached.current = true;
-             }
-          });
+         videoRef.current.play().catch(error => {
+           if (error.name === "NotAllowedError" && !interactionListenerAttached.current) {
+               const handleFirstInteraction = () => {
+                   attemptPlay();
+                   window.removeEventListener('click', handleFirstInteraction, true);
+                   window.removeEventListener('touchstart', handleFirstInteraction, true);
+                   interactionListenerAttached.current = false;
+               };
+               window.addEventListener('click', handleFirstInteraction, { once: true, capture: true });
+               window.addEventListener('touchstart', handleFirstInteraction, { once: true, capture: true });
+               interactionListenerAttached.current = true;
+           }
+         });
        }
     };
 
-    attemptPlay(); // Intento inicial
+    attemptPlay();
 
     video.style.position = 'fixed';
     video.style.top = '-9999px';
@@ -52,24 +67,26 @@ const HeroExperience = () => {
     document.body.appendChild(video);
 
     return () => {
-        // La limpieza de los listeners con {once: true} es automática en navegadores modernos
-        // Si se necesitaran remover manualmente, se haría aquí.
         if (videoRef.current) {
+            videoRef.current.removeEventListener('ended', playNextVideo);
             videoRef.current.pause();
-            videoRef.current.removeAttribute('src');
-            videoRef.current.load();
             if (document.body.contains(videoRef.current)) {
                 document.body.removeChild(videoRef.current);
             }
-            videoRef.current = null;
         }
         if (texture) {
             texture.dispose();
         }
-        setVideoTexture(null);
-        interactionListenerAttached.current = false;
     };
   }, []);
+
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.src = videoSources[currentVideoIndex];
+      videoRef.current.load();
+      videoRef.current.play().catch(e => console.warn("Play after src change was prevented.", e));
+    }
+  }, [currentVideoIndex, videoSources]);
 
   const handleVideoClick = () => {
     if (videoRef.current) {
@@ -82,13 +99,8 @@ const HeroExperience = () => {
   };
 
   return (
-    <Canvas camera={{ position: [0, 0, 15], fov: 45 }}>
-      <ambientLight intensity={0.2} color="#FFB84D" />
-      <directionalLight intensity={0.4} color="#FF66B2" position={[10, 10, 10]} />
-
+    <Canvas camera={{ position: [0, 0, 15], fov: 45 }} flat>
       <Suspense fallback={null}>
-        <Particles count={150} color="#FF66B2" size={1.5} position={[0, 0, -15]} />
-
         {videoTexture && (
           <mesh
             position={isMobile ? [0, -3, -5] : [0, 0, -8]}
@@ -96,7 +108,11 @@ const HeroExperience = () => {
             onClick={handleVideoClick}
           >
             <planeGeometry args={[1, 1]} />
-            <meshBasicMaterial map={videoTexture} side={THREE.DoubleSide} />
+            <meshStandardMaterial 
+              emissive="#ffffff"
+              emissiveMap={videoTexture}
+              side={THREE.DoubleSide} 
+            />
           </mesh>
         )}
       </Suspense>

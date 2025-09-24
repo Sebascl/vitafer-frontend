@@ -1,23 +1,69 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useCart } from '../context/CartContext';
-import CheckoutForm from './checkoutForm'; // Asegúrate que el nombre del archivo sea checkoutForm.jsx
+import CheckoutForm from './checkoutForm';
 
 const ShoppingCart = () => {
   const {
     cartItems,
     removeFromCart,
-    updateQuantity, // Esta función ya debería verificar stock desde el contexto
+    updateQuantity,
     cartTotal,
     formatMXN,
-    getNumericPrice, // Usado para calcular itemPrice aquí, pero el stock se verifica en updateQuantity
+    getNumericPrice,
     setIsCartOpen,
-    allProductsWithStock // Para consultar el stock actual si es necesario para deshabilitar
+    allProductsWithStock,
+    setNotification
   } = useCart();
 
   const [showCheckout, setShowCheckout] = useState(false);
+  const [itemInputQuantities, setItemInputQuantities] = useState({});
+
+  useEffect(() => {
+    const newInputs = {};
+    cartItems.forEach(item => {
+      newInputs[item.id] = item.quantity.toString();
+    });
+    setItemInputQuantities(newInputs);
+  }, [cartItems]);
 
   const handleCancelCheckout = () => {
     setShowCheckout(false);
+  };
+
+  const handleCartItemInputChange = (itemId, value) => {
+    setItemInputQuantities(prev => ({
+      ...prev,
+      [itemId]: value
+    }));
+  };
+
+  const handleCartItemInputBlur = (itemId) => {
+    const itemInCart = cartItems.find(ci => ci.id === itemId);
+    if (!itemInCart) return;
+
+    const currentInputValue = itemInputQuantities[itemId];
+    let newQuantity = parseInt(currentInputValue, 10);
+    
+    const productData = allProductsWithStock.find(p => p.id === itemId);
+    const currentItemStock = productData ? productData.stock : 0;
+
+    if (isNaN(newQuantity) || newQuantity < 1) {
+      newQuantity = 1;
+    }
+    if (currentItemStock > 0 && newQuantity > currentItemStock) {
+      setNotification(`Solo quedan ${currentItemStock} unidades. Se ajustó la cantidad.`);
+      newQuantity = currentItemStock;
+    } else if (currentItemStock === 0 && newQuantity > 0) {
+      setNotification(`${itemInCart.name} está agotado.`);
+      newQuantity = 0;
+    }
+    
+    const amountToChange = newQuantity - itemInCart.quantity;
+    if (amountToChange !== 0) {
+      updateQuantity(itemId, amountToChange);
+    } else {
+      setItemInputQuantities(prev => ({ ...prev, [itemId]: itemInCart.quantity.toString() }));
+    }
   };
 
   return (
@@ -41,8 +87,7 @@ const ShoppingCart = () => {
             <CheckoutForm
                 cartItems={cartItems}
                 cartTotal={cartTotal}
-                formatPrice={formatMXN} // formatPrice sí se pasa
-                // getNumericPrice y allProductsWithStock no son necesarios para CheckoutForm directamente
+                formatPrice={formatMXN}
                 onCancel={handleCancelCheckout}
             />
           </>
@@ -54,36 +99,48 @@ const ShoppingCart = () => {
             ) : (
               <div className="space-y-4">
                 {cartItems.map((item) => {
-                  // El 'item' en cartItems podría no tener el stock más actualizado si cambió desde que se añadió.
-                  // Es mejor obtener el stock actual de allProductsWithStock para la lógica de deshabilitar.
-                  const productDataFromStockList = allProductsWithStock.find(p => p.id === item.id);
-                  const currentItemStock = productDataFromStockList ? productDataFromStockList.stock : 0;
-
-                  // El precio unitario para el display se puede calcular basado en el item del carrito
-                  const itemPrice = getNumericPrice(item.pricingTiers || item.price, item.quantity);
-                  const totalItemPrice = itemPrice * item.quantity;
+                  const productData = allProductsWithStock.find(p => p.id === item.id);
+                  const currentItemStock = productData ? productData.stock : 0;
+                  
+                  let itemUnitPriceToShow = getNumericPrice(item.price);
+                  if (item.pricingTiers && item.pricingTiers.length > 0) {
+                      const tier = item.pricingTiers.slice().reverse().find(t => item.quantity >= t.quantity) || item.pricingTiers[0];
+                      itemUnitPriceToShow = tier.pricePerUnit;
+                  }
+                  const totalItemPrice = itemUnitPriceToShow * item.quantity;
                   
                   return (
-                   <div key={item.id || item.name} className="flex items-start justify-between p-3 bg-gray-900/80 rounded-lg border border-gray-700 gap-2">
+                   <div key={item.id} className="flex items-start justify-between p-3 bg-gray-900/80 rounded-lg border border-gray-700 gap-2">
                       <div className="flex items-start gap-2 sm:gap-3 flex-grow min-w-0">
                         <img src={item.modelPath} alt={item.name} className="w-14 h-14 sm:w-16 sm:h-16 object-contain rounded bg-black/30 p-0.5 flex-shrink-0"/>
                         <div className="flex-grow min-w-0 pt-0.5">
                           <h4 className="font-semibold text-xs sm:text-sm md:text-base text-yellow-300 truncate" title={item.name}>{item.name}</h4>
-                          <p className="text-[10px] sm:text-xs md:text-sm text-gray-300">{formatMXN(itemPrice)} c/u</p>
+                          <p className="text-[10px] sm:text-xs md:text-sm text-gray-300">{formatMXN(itemUnitPriceToShow)} c/u</p>
                         </div>
                       </div>
 
                       <div className="flex flex-col items-end sm:flex-row sm:items-center gap-1.5 sm:gap-2 md:gap-3 flex-shrink-0 pt-0.5">
                         <div className="flex items-center gap-1 sm:gap-1.5 order-1">
-                          <button onClick={() => updateQuantity(item.id, -1)} className="p-1 px-1.5 sm:px-2 bg-red-600 hover:bg-red-700 rounded text-white font-bold text-[10px] sm:text-xs">-</button>
-                          <span className="min-w-[16px] sm:min-w-[20px] text-center font-semibold text-xs sm:text-sm">{item.quantity}</span>
+                          <button 
+                            onClick={() => updateQuantity(item.id, -1)} 
+                            disabled={item.quantity <= 1}
+                            className="p-1 px-1.5 sm:px-2 bg-red-600 hover:bg-red-700 rounded text-white font-bold text-[10px] sm:text-xs disabled:opacity-50"
+                          >-</button>
+                          <input
+                            type="number"
+                            value={itemInputQuantities[item.id] || ''}
+                            onChange={(e) => handleCartItemInputChange(item.id, e.target.value)}
+                            onBlur={() => handleCartItemInputBlur(item.id)}
+                            min="1"
+                            max={currentItemStock > 0 ? currentItemStock : undefined}
+                            disabled={currentItemStock === 0 && item.quantity === 0}
+                            className="w-10 sm:w-12 px-1 py-0.5 text-center font-semibold text-xs sm:text-sm text-white bg-gray-700/50 border border-gray-600 rounded-md focus:ring-yellow-500 focus:border-yellow-500 appearance-none [-moz-appearance:textfield]"
+                          />
                           <button 
                             onClick={() => updateQuantity(item.id, 1)} 
-                            disabled={item.quantity >= currentItemStock} // Deshabilita si la cantidad en carrito alcanza el stock actual
+                            disabled={item.quantity >= currentItemStock}
                             className="p-1 px-1.5 sm:px-2 bg-green-600 hover:bg-green-700 rounded text-white font-bold text-[10px] sm:text-xs disabled:opacity-50"
-                          >
-                            +
-                          </button>
+                          >+</button>
                         </div>
 
                         <div className="flex items-center gap-1.5 sm:gap-2 mt-1 sm:mt-0 order-2">
