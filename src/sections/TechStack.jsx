@@ -10,17 +10,20 @@ gsap.registerPlugin(ScrollTrigger);
 const TechStack = () => {
   const { allProductsWithStock, isLoadingProducts } = useCart();
 
-  const promoProducts = allProductsWithStock.filter(p => p.isPromo);
-  const regularProducts = allProductsWithStock.filter(p => !p.isPromo && p.id && (p.category === "Suplementos Energéticos" || p.category === "Suplementos en Sachet" || p.category === "Potenciadores en Shot"));
-  const vitaferOffers = allProductsWithStock.filter(p => p.id && p.category === "Mayoreo");
+  const fatherDayPromosView = allProductsWithStock.filter(p => p.id && p.category === "Promociones Papá");
+  const regularProductsView = allProductsWithStock.filter(p => p.id && p.category === "Productos Individuales");
+  const offersView = allProductsWithStock.filter(p => p.id && p.category === "Mayoreo");
 
   useEffect(() => {
     if (!isLoadingProducts && allProductsWithStock.length > 0) {
-      const floatLayers = gsap.utils.toArray(".card-float-layer");
-      if (floatLayers.length === 0) return;
-      const fadeIn = gsap.fromTo(floatLayers, { opacity: 0, y: -20 }, { opacity: 1, y: 0, duration: 1, ease: "power2.out", stagger: 0.1, scrollTrigger: { trigger: "#promociones", start: "top 70%", once: true } });
-      floatLayers.forEach((card, i) => { gsap.set(card, { willChange: "transform" }); const floatAnim = gsap.to(card, { y: "+=20", boxShadow: "0 0 40px rgba(255, 255, 0, 0.1)", duration: 1.8 + Math.random() * 0.4, ease: "sine.inOut", repeat: -1, yoyo: true, delay: i * 0.1, paused: true }); ScrollTrigger.create({ trigger: card, start: "top bottom-=100", end: "bottom top+=100", onEnter: () => floatAnim.play(), onLeave: () => floatAnim.pause(), onEnterBack: () => floatAnim.play(), onLeaveBack: () => floatAnim.pause() }); });
-      return () => { fadeIn.kill(); ScrollTrigger.getAll().forEach((st) => st.kill()); gsap.killTweensOf(".card-float-layer"); };
+      const cardsToAnimate = gsap.utils.toArray(".tech-card");
+      if (cardsToAnimate.length > 0) {
+        gsap.fromTo(cardsToAnimate, { opacity: 0, y: -20 }, { opacity: 1, y: 0, duration: 0.8, ease: "power2.out", stagger: 0.1, scrollTrigger: { trigger: ".product-sections-wrapper", start: "top 80%", once: true }});
+      }
+      return () => {
+        ScrollTrigger.getAll().forEach((st) => st.kill());
+        gsap.killTweensOf(".tech-card");
+      };
     }
   }, [isLoadingProducts, allProductsWithStock]);
 
@@ -29,40 +32,33 @@ const TechStack = () => {
   }
 
   return (
-    <div className="flex-center section-padding bg-black text-white overflow-hidden py-10">
-      <div className="w-full h-full md:px-10 px-5 max-w-7xl mx-auto">
-
-        <TitleHeader title="🚀 POTENCIA TUS LÍMITES 🚀" sub="Descubre nuestros elixires más vendidos con envío GRATIS a todo el país. ¡Tu energía no puede esperar!" />
-
-        <div id="skills" className="mt-16 md:mt-20">
-          {promoProducts.length > 0 && (
-            <div id="promociones" className="my-12 md:my-16 p-6 md:p-8 bg-gradient-to-b from-gray-900 to-black border-2 border-yellow-400 rounded-3xl shadow-2xl shadow-yellow-500/20">
-              <div className="text-center mb-8">
-                <h2 className="text-3xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-orange-500 mb-2">
-                  ⚡ ¡NUESTRAS PROMOS ESTRELLA! ⚡
-                </h2>
-                <p className="text-white/80 text-lg">
-                  Precios especiales <strong>válidos solo por Agosto</strong>. ¡No te los pierdas!
-                </p>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8 max-w-4xl mx-auto">
-                {promoProducts.map(item => <ProductCard key={item.id} item={item} />)}
-              </div>
+    <div className="product-sections-wrapper section-padding bg-black text-white overflow-x-hidden py-10">
+      <div className="w-full md:px-10 px-5 max-w-7xl mx-auto">
+        
+        {fatherDayPromosView.length > 0 && (
+          <section id="promo-papa" className="mb-16 md:mb-20 pt-10">
+            <TitleHeader title="👨‍👧‍👦 ¡Regalos Únicos para Papá!" sub="Packs exclusivos para celebrar al rey de la casa." />
+            <div className="grid md:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-6 md:gap-9 mt-12">
+              {fatherDayPromosView.map(item => <ProductCard key={item.id} item={item} />)}
             </div>
-          )}
-          <TitleHeader title="CATÁLOGO COMPLETO" sub="Encuentra el elixir perfecto para cada ocasión." />
-          <div className="grid md:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-6 md:gap-9 mt-12">
-            {regularProducts.map(item => <ProductCard key={item.id} item={item} />)}
-          </div>
-        </div>
+          </section>
+        )}
 
-        <div className="mt-16 md:mt-20">
-          <TitleHeader title="🛍️ OFERTAS MAYORISTAS" sub="Precios de demolición para compras por volumen." />
-          <div className="grid md:grid-cols-2 sm:grid-cols-1 grid-cols-1 gap-6 md:gap-9 mt-12">
-            {vitaferOffers.map(item => <ProductCard key={item.id} item={item} />)}
-          </div>
-        </div>
+        <section id="skills" className="mb-16 md:mb-20 pt-10">
+            <TitleHeader title="🔥 ¡Potencia tu Deseo!" sub="Elige el paquete ideal para llevar tu energía al máximo."/>
+            <div className="grid md:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-6 md:gap-9 mt-12">
+              {regularProductsView.map(item => <ProductCard key={item.id} item={item} />)}
+            </div>
+        </section>
 
+        {offersView.length > 0 && (
+            <section id="ofertas-mayoreo" className="mt-16 md:mt-20 pt-10">
+              <TitleHeader title="🛍️ Ofertas al Por Mayor" sub="Precios especiales para compras en volumen."/>
+              <div className="grid md:grid-cols-2 sm:grid-cols-1 grid-cols-1 gap-6 md:gap-9 mt-12">
+                {offersView.map(item => <ProductCard key={item.id} item={item} />)}
+              </div>
+            </section>
+        )}
       </div>
     </div>
   );
