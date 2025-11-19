@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useCart } from '../context/CartContext';
-import { initMercadoPago } from '@mercadopago/sdk-react'; // Wallet ya no se usa aquí directamente
+import { useAuth } from '../context/AuthContext';
+import { initMercadoPago } from '@mercadopago/sdk-react';
 
 const mercadoPagoPublicKey = import.meta.env.VITE_MERCADOPAGO_PUBLIC_KEY;
 
@@ -11,6 +12,7 @@ if (mercadoPagoPublicKey) {
 }
 
 const CheckoutForm = ({ cartItems, cartTotal }) => {
+  const { user } = useAuth();
   const [formData, setFormData] = useState({
     name: '', email: '', phone: '', address: '', city: '', state: '', postalCode: '',
   });
@@ -19,6 +21,17 @@ const CheckoutForm = ({ cartItems, cartTotal }) => {
 
   const { getNumericPrice } = useCart();
   const backendApiUrl = import.meta.env.VITE_BACKEND_API_URL;
+
+  useEffect(() => {
+    if (user) {
+      setFormData(prev => ({
+        ...prev,
+        name: user.name || '',
+        email: user.email || '',
+        phone: user.phone || prev.phone
+      }));
+    }
+  }, [user]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -43,6 +56,7 @@ const CheckoutForm = ({ cartItems, cartTotal }) => {
       })),
       totalAmount: cartTotal,
       referralCode: referralCode || undefined,
+      userId: user ? user.id : null
     };
 
     if (!backendApiUrl) {
