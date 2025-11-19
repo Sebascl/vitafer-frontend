@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useCart } from '../context/CartContext';
 import ProductCard from '../components/ProductCard';
+import { FaBolt, FaFire, FaStar } from 'react-icons/fa';
 
 const StorePage = () => {
   const { allProductsWithStock, isLoadingProducts } = useCart();
@@ -13,8 +14,15 @@ const StorePage = () => {
   }, [allProductsWithStock, isLoadingProducts]);
 
   const filteredProducts = useMemo(() => {
-    if (activeCategory === 'Todos') return allProductsWithStock;
-    return allProductsWithStock.filter(p => p.category === activeCategory);
+    let products = activeCategory === 'Todos' 
+        ? allProductsWithStock 
+        : allProductsWithStock.filter(p => p.category === activeCategory);
+    
+    return products.sort((a, b) => {
+        const aHasStock = a.stock > 0 ? 1 : 0;
+        const bHasStock = b.stock > 0 ? 1 : 0;
+        return bHasStock - aHasStock;
+    });
   }, [allProductsWithStock, activeCategory]);
 
   if (isLoadingProducts) {
@@ -26,45 +34,68 @@ const StorePage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white pb-20">
-      <div className="relative w-full h-[40vh] bg-gradient-to-b from-gray-900 via-black to-black flex items-center justify-center overflow-hidden pt-16">
-         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-yellow-900/20 via-black/0 to-black/0 opacity-50"></div>
-         <div className="relative z-10 text-center px-4">
-            <h1 className="text-5xl md:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-500 mb-4 tracking-tighter">
-                TIENDA OFICIAL
+    <div className="min-h-screen bg-black text-white pb-20 relative overflow-x-hidden">
+      
+      {/* --- HERO BANNER LLAMATIVO --- */}
+      <div className="relative w-full pt-36 pb-20 px-6 flex flex-col items-center justify-center overflow-hidden">
+         <div className="absolute inset-0 bg-black">
+             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[120%] h-[800px] bg-gradient-to-b from-yellow-600/20 via-black to-black rounded-b-[100%] blur-3xl opacity-40 pointer-events-none"></div>
+             <div className="absolute top-20 left-10 w-64 h-64 bg-yellow-500/10 blur-[80px] rounded-full animate-pulse pointer-events-none"></div>
+             <div className="absolute top-40 right-10 w-64 h-64 bg-red-600/10 blur-[80px] rounded-full animate-pulse delay-1000 pointer-events-none"></div>
+         </div>
+
+         <div className="relative z-10 text-center max-w-4xl mx-auto">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-yellow-500/10 border border-yellow-500/30 mb-6 backdrop-blur-sm">
+                <FaBolt className="text-yellow-400" />
+                <span className="text-yellow-300 font-bold text-xs sm:text-sm uppercase tracking-widest">Potencia 100% Natural</span>
+            </div>
+            
+            <h1 className="text-5xl sm:text-6xl md:text-8xl font-black text-white mb-6 tracking-tighter leading-none drop-shadow-2xl">
+                DESPIERTA TU <br/>
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-orange-500 to-yellow-600">POTENCIA</span>
             </h1>
-            <p className="text-lg text-yellow-500/80 font-medium uppercase tracking-widest">
-                Potencia Natural & Energía Ilimitada
+            
+            <p className="text-lg sm:text-xl text-gray-400 max-w-2xl mx-auto mb-10 font-medium">
+                Envíos discretos a todo México. Resultados garantizados desde la primera toma.
             </p>
          </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-10 relative z-20">
-        <div className="flex flex-wrap justify-center gap-2 mb-12 bg-gray-900/80 backdrop-blur-md p-2 rounded-full border border-white/10 inline-flex items-center shadow-2xl mx-auto w-fit max-w-full overflow-x-auto">
-          {categories.map(category => (
-            <button
-              key={category}
-              onClick={() => setActiveCategory(category)}
-              className={`px-6 py-2.5 text-sm font-bold rounded-full transition-all duration-300 whitespace-nowrap ${
-                activeCategory === category
-                  ? 'bg-yellow-500 text-black shadow-[0_0_15px_rgba(234,179,8,0.4)]'
-                  : 'text-gray-400 hover:text-white hover:bg-white/5'
-              }`}
-            >
-              {category}
-            </button>
-          ))}
+      {/* --- CONTENIDO DE LA TIENDA --- */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-20">
+        
+        <div className="flex justify-center mb-16">
+            <div className="inline-flex flex-wrap justify-center gap-2 p-2 bg-gray-900/60 backdrop-blur-xl rounded-2xl border border-white/10 shadow-2xl">
+              {categories.map(category => (
+                <button
+                  key={category}
+                  onClick={() => setActiveCategory(category)}
+                  className={`px-6 py-3 rounded-xl font-bold text-sm transition-all duration-300 flex items-center gap-2 ${
+                    activeCategory === category
+                      ? 'bg-yellow-500 text-black shadow-[0_0_20px_rgba(234,179,8,0.4)] scale-105'
+                      : 'text-gray-400 hover:text-white hover:bg-white/5'
+                  }`}
+                >
+                  {category === 'Todos' && <FaFire />}
+                  {category === 'Mayoreo' && <FaStar />}
+                  {category}
+                </button>
+              ))}
+            </div>
         </div>
 
         {filteredProducts.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 lg:gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                 {filteredProducts.map(item => (
-                    <ProductCard key={item.id} item={item} />
+                    <div key={item.id} className={`transform transition-transform duration-300 ${item.stock <= 0 ? 'opacity-60 grayscale' : 'hover:-translate-y-2'}`}>
+                        <ProductCard item={item} />
+                    </div>
                 ))}
             </div>
         ) : (
-            <div className="text-center py-20 bg-gray-900/30 rounded-xl border border-white/5">
-                <p className="text-gray-500 text-xl">No hay productos disponibles en esta categoría por el momento.</p>
+            <div className="text-center py-32 bg-gray-900/30 rounded-3xl border border-white/5">
+                <p className="text-gray-500 text-2xl font-bold">No hay productos en esta categoría.</p>
+                <button onClick={() => setActiveCategory('Todos')} className="mt-4 text-yellow-500 hover:underline">Ver todos los productos</button>
             </div>
         )}
       </div>

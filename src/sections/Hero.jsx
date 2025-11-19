@@ -1,8 +1,6 @@
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
-
-import AnimatedCounter from "../components/AnimatedCounter";
-import Button from "../components/Button";
+import { Link } from "react-router-dom";
 import { words } from "../constants";
 import HeroExperience from "../components/models/hero_models/HeroExperience";
 
@@ -22,12 +20,8 @@ const Hero = () => {
 
   return (
     <section id="hero" className="relative overflow-hidden bg-black">
-      {/* Background image */}
-
-
-      {/* Content layout */}
+      
       <div className="hero-layout flex flex-col md:flex-row items-center justify-between relative z-10 w-full px-4">
-        {/* Left: Header */}
         <header className="hero-header">
           <div className="flex flex-col gap-7">
             <div className="hero-text">
@@ -59,15 +53,15 @@ const Hero = () => {
               natural para rendir al máximo cuando más lo necesitas.
             </p>
 
-            <Button
-              text="Compra Ahora!"
-              className="md:w-80 md:h-16 w-80 h-12 hero-button"
-              id="counter"
-            />
+            <Link 
+                to="/" 
+                className="hero-button inline-flex items-center justify-center md:w-80 md:h-16 w-80 h-14 bg-yellow-500 hover:bg-yellow-400 text-black font-black text-xl rounded-lg transition-all transform hover:scale-105 shadow-lg shadow-yellow-500/30"
+            >
+              ¡Compra Ahora!
+            </Link>
           </div>
         </header>
 
-        {/* Right: 3D model */}
         <figure className="hero-figure">
           <div className="hero-3d-layout">
             <HeroExperience />
