@@ -1,14 +1,13 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { useCart } from '../context/CartContext';
 
 const LoginPage = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
   const { login } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
+  const location = useLocation(); 
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -16,7 +15,9 @@ const LoginPage = () => {
       await login(formData.email, formData.password);
       
       const origin = location.state?.from || '/mi-perfil';
-      navigate(origin, { replace: true });
+      const shouldOpenCart = location.state?.openCart || false;
+
+      navigate(origin, { replace: true, state: { openCart: shouldOpenCart } });
       
     } catch (err) {
       setError(err.message || 'Error al iniciar sesión');
@@ -77,7 +78,7 @@ const LoginPage = () => {
         <div className="mt-6 pt-6 border-t border-white/10 text-center">
           <p className="text-gray-400 text-sm">
             ¿No tienes cuenta?{' '}
-            <Link to="/registro" state={{ from: location.state?.from }} className="text-yellow-400 font-semibold hover:text-yellow-300 transition-colors">
+            <Link to="/registro" state={{ from: location.state?.from, openCart: location.state?.openCart }} className="text-yellow-400 font-semibold hover:text-yellow-300 transition-colors">
               Regístrate gratis
             </Link>
           </p>

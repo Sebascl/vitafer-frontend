@@ -21,7 +21,8 @@ const ShoppingCart = () => {
   const handleProceedToCheckout = () => {
       if (!user) {
           handleClose();
-          navigate('/login', { state: { from: location.pathname } });
+          // CAMBIO: Enviamos 'openCart: true' junto con la ruta de origen
+          navigate('/login', { state: { from: location.pathname, openCart: true } });
       } else {
           setShowCheckout(true);
       }

@@ -10,7 +10,7 @@ const RegisterPage = () => {
   const [error, setError] = useState('');
   const { register } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
+  const location = useLocation(); 
 
   const handleChange = (e) => {
       setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -22,7 +22,10 @@ const RegisterPage = () => {
       await register(formData);
       
       const origin = location.state?.from || '/mi-perfil';
-      navigate(origin, { replace: true });
+      const shouldOpenCart = location.state?.openCart || false;
+
+      // CAMBIO: Pasamos el estado openCart de nuevo
+      navigate(origin, { replace: true, state: { openCart: shouldOpenCart } });
 
     } catch (err) {
       setError(err.message || 'Error al registrarse');
@@ -98,7 +101,7 @@ const RegisterPage = () => {
         <div className="mt-6 text-center">
           <p className="text-gray-400 text-sm">
             ¿Ya tienes cuenta?{' '}
-            <Link to="/login" state={{ from: location.state?.from }} className="text-yellow-400 font-semibold hover:underline">Inicia sesión</Link>
+            <Link to="/login" state={{ from: location.state?.from, openCart: location.state?.openCart }} className="text-yellow-400 font-semibold hover:underline">Inicia sesión</Link>
           </p>
         </div>
       </div>

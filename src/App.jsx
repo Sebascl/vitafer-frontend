@@ -36,12 +36,20 @@ const ProtectedUserRoute = ({ children }) => {
 };
 
 function AppContent() {
-  const { isCartOpen } = useCart();
-  const { pathname } = useLocation();
+  const { isCartOpen, setIsCartOpen } = useCart();
+  const location = useLocation(); 
+  const { pathname } = location;
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [pathname]);
+
+  useEffect(() => {
+      if (location.state?.openCart) {
+          setIsCartOpen(true);
+          window.history.replaceState({}, document.title); 
+      }
+  }, [location, setIsCartOpen]);
 
   useEffect(() => {
     const queryParams = new URLSearchParams(window.location.search);
