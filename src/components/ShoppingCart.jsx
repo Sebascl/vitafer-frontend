@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import CheckoutForm from './checkoutForm';
 import { FaTimes, FaTrash, FaShoppingCart, FaLock } from 'react-icons/fa';
 
@@ -13,6 +13,7 @@ const ShoppingCart = () => {
   
   const { user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [showCheckout, setShowCheckout] = useState(false);
 
   const handleClose = () => setIsCartOpen(false);
@@ -20,7 +21,7 @@ const ShoppingCart = () => {
   const handleProceedToCheckout = () => {
       if (!user) {
           handleClose();
-          navigate('/login');
+          navigate('/login', { state: { from: location.pathname } });
       } else {
           setShowCheckout(true);
       }
@@ -32,12 +33,10 @@ const ShoppingCart = () => {
         onClick={handleClose}
     >
       <div 
-        // CAMBIO DE COLOR: bg-zinc-950 (Negro profundo pero no absoluto) + Borde dorado sutil
         className="absolute right-0 top-0 h-full w-full sm:w-[480px] bg-zinc-950 shadow-[-10px_0_30px_rgba(234,179,8,0.1)] transform transition-transform duration-300 ease-out flex flex-col border-l border-yellow-500/20"
         onClick={(e) => e.stopPropagation()} 
       >
         
-        {/* Header */}
         <div className="p-6 flex justify-between items-center border-b border-white/10 bg-black/40">
             <h2 className="text-2xl font-black text-white flex items-center gap-3 uppercase tracking-wide">
                 <FaShoppingCart className="text-yellow-500"/> 
@@ -48,7 +47,6 @@ const ShoppingCart = () => {
             </button>
         </div>
 
-        {/* Content */}
         <div className="flex-grow overflow-y-auto p-6 custom-scrollbar bg-zinc-950">
             {showCheckout && user ? (
                 <>
@@ -77,7 +75,6 @@ const ShoppingCart = () => {
                                 const unitPrice = getNumericPrice(item.price, item.quantity);
 
                                 return (
-                                    // ITEM CARD: Fondo oscuro con borde sutil
                                     <div key={item.id} className="bg-zinc-900 p-4 rounded-xl border border-white/5 hover:border-yellow-500/30 transition-colors flex gap-4 group shadow-md">
                                         <div className="w-24 h-24 bg-black rounded-lg p-2 flex-shrink-0 border border-gray-800 flex items-center justify-center">
                                             <img src={item.modelPath} alt={item.name} className="w-full h-full object-contain group-hover:scale-105 transition-transform"/>
@@ -89,7 +86,6 @@ const ShoppingCart = () => {
                                             </div>
                                             
                                             <div className="flex justify-between items-end mt-2">
-                                                {/* Botones de cantidad estilo premium */}
                                                 <div className="flex items-center bg-black rounded-lg border border-gray-700 h-9">
                                                     <button onClick={() => updateQuantity(item.id, -1)} className="px-3 text-gray-400 hover:text-white hover:bg-gray-800 h-full rounded-l-lg transition-colors" disabled={item.quantity <= 1}>-</button>
                                                     <span className="text-white font-bold text-sm w-8 text-center">{item.quantity}</span>
@@ -109,7 +105,6 @@ const ShoppingCart = () => {
             )}
         </div>
 
-        {/* Footer */}
         {!showCheckout && cartItems.length > 0 && (
             <div className="p-6 border-t border-white/10 bg-black/40 backdrop-blur-lg">
                 <div className="flex justify-between items-end mb-6">

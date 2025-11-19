@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 const RegisterPage = () => {
@@ -10,6 +10,7 @@ const RegisterPage = () => {
   const [error, setError] = useState('');
   const { register } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleChange = (e) => {
       setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -19,7 +20,10 @@ const RegisterPage = () => {
     e.preventDefault();
     try {
       await register(formData);
-      navigate('/mi-perfil');
+      
+      const origin = location.state?.from || '/mi-perfil';
+      navigate(origin, { replace: true });
+
     } catch (err) {
       setError(err.message || 'Error al registrarse');
     }
@@ -93,7 +97,8 @@ const RegisterPage = () => {
 
         <div className="mt-6 text-center">
           <p className="text-gray-400 text-sm">
-            ¿Ya tienes cuenta? <Link to="/login" className="text-yellow-400 font-semibold hover:underline">Inicia sesión</Link>
+            ¿Ya tienes cuenta?{' '}
+            <Link to="/login" state={{ from: location.state?.from }} className="text-yellow-400 font-semibold hover:underline">Inicia sesión</Link>
           </p>
         </div>
       </div>
