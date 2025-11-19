@@ -1,183 +1,184 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
-import { FaShippingFast } from 'react-icons/fa';
+import { FaShippingFast, FaShieldAlt, FaLock, FaCheckCircle, FaArrowLeft, FaWhatsapp, FaShoppingCart, FaBolt } from 'react-icons/fa';
 
 const ProductDetailPage = () => {
-  const { productIdOrName } = useParams(); // <-- CAMBIO AQUÍ
-  const { 
-    addToCart, 
-    formatMXN, 
-    getNumericPrice, 
-    setNotification,
-    allProductsWithStock,
-    isLoadingProducts 
-  } = useCart();
+  const { productIdOrName } = useParams();
+  const { addToCart, buyNow, formatMXN, getNumericPrice, allProductsWithStock, isLoadingProducts } = useCart();
   const navigate = useNavigate();
   
   const [product, setProduct] = useState(null);
   const [quantity, setQuantity] = useState(1);
-  const [inputValue, setInputValue] = useState('1');
-  const [currentTotal, setCurrentTotal] = useState(0);
-  const [recommendations, setRecommendations] = useState([]);
-
-  const currentStock = product?.stock !== undefined ? product.stock : 0;
+  const [activeImg, setActiveImg] = useState('');
 
   useEffect(() => {
     window.scrollTo(0, 0); 
-    if (isLoadingProducts || !allProductsWithStock || allProductsWithStock.length === 0) return;
+    if (isLoadingProducts || !allProductsWithStock) return;
 
-    const decodedIdentifier = decodeURIComponent(productIdOrName); // <-- CAMBIO AQUÍ
-    const foundProduct = allProductsWithStock.find(p => p.id === decodedIdentifier || p.name === decodedIdentifier);
+    const decoded = decodeURIComponent(productIdOrName);
+    const found = allProductsWithStock.find(p => p.id === decoded || p.name === decoded);
     
-    if (foundProduct) {
-      setProduct(foundProduct);
-      setQuantity(1); 
-      setInputValue('1');
-      const otherProducts = allProductsWithStock
-        .filter(p => p.id !== foundProduct.id && p.name !== foundProduct.name) 
-        .sort(() => 0.5 - Math.random())
-        .slice(0, 3);
-      setRecommendations(otherProducts);
+    if (found) {
+      setProduct(found);
+      setActiveImg(found.modelPath);
+      setQuantity(1);
     } else {
-      console.error("Producto no encontrado en allProductsWithStock:", decodedIdentifier);
       navigate('/'); 
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [productIdOrName, isLoadingProducts, allProductsWithStock]); // <-- CAMBIO AQUÍ
+  }, [productIdOrName, isLoadingProducts, allProductsWithStock, navigate]);
 
-  useEffect(() => {
-    if (product) {
-      let unitPrice;
-      const currentQuantityForCalc = (typeof quantity === 'number' && !isNaN(quantity) && quantity > 0) ? quantity : 1;
-      if (product.pricingTiers && product.pricingTiers.length > 0) {
-        const tier = product.pricingTiers.slice().reverse().find(t => currentQuantityForCalc >= t.quantity) || product.pricingTiers[0];
-        unitPrice = tier.pricePerUnit;
-      } else if (product.priceNumber) {
-        unitPrice = product.priceNumber;
-      } else {
-        unitPrice = getNumericPrice(product.price);
-      }
-      if (typeof unitPrice === 'number') {
-        setCurrentTotal(unitPrice * currentQuantityForCalc);
-      }
-    }
-  }, [product, quantity, getNumericPrice]);
+  if (isLoadingProducts || !product) {
+    return <div className="min-h-screen bg-black flex items-center justify-center"><div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-yellow-500"></div></div>;
+  }
 
-  useEffect(() => {
-    setInputValue(quantity.toString());
-  }, [quantity]);
+  const currentStock = product.stock || 0;
+  let unitPrice = getNumericPrice(product.price);
+  if(product.pricingTiers?.length > 0) {
+      const tier = product.pricingTiers.slice().reverse().find(t => quantity >= t.quantity) || product.pricingTiers[0];
+      unitPrice = tier.pricePerUnit;
+  }
 
-  const handleDirectQuantityInputChange = (e) => {
-    const value = e.target.value;
-    setInputValue(value);
-    if (value === '') return;
-    let numValue = parseInt(value, 10);
-    if (!isNaN(numValue)) {
-      numValue = Math.max(1, numValue);
-      if (currentStock > 0 && numValue > currentStock) numValue = currentStock;
-      setQuantity(numValue);
-    }
-  };
-  
-  const handleQuantityInputBlur = () => {
-    let finalQuantity = parseInt(inputValue, 10);
-    if (isNaN(finalQuantity) || finalQuantity < 1) finalQuantity = 1;
-    if (currentStock > 0 && finalQuantity > currentStock) finalQuantity = currentStock;
-    if (currentStock === 0) finalQuantity = 1;
-    setQuantity(finalQuantity);
-  };
+  const totalPrice = unitPrice * quantity;
 
-  const handleQuantityChangeButtons = (amount) => {
-    setQuantity(prev => {
-        const currentVal = (typeof prev === 'number' && !isNaN(prev)) ? prev : 1;
-        let newQuantity = Math.max(1, currentVal + amount);
-        if (currentStock > 0 && newQuantity > currentStock) { setNotification(`Solo quedan ${currentStock} unidades.`); return currentStock; }
-        return newQuantity;
-    });
+  const handleQuantity = (val) => {
+      const newQ = Math.max(1, Math.min(val, currentStock > 0 ? currentStock : 1));
+      setQuantity(newQ);
   };
 
   const handleAddToCart = () => {
-    if (!product) return;
-    if (currentStock <= 0) { setNotification(`${product.name} está agotado.`); return; }
-    let finalQuantity = (typeof quantity === 'number' && !isNaN(quantity)) ? quantity : 1;
-    finalQuantity = Math.min(Math.max(1, finalQuantity), currentStock);
-    if (finalQuantity <= 0) { setNotification(`Selecciona una cantidad válida.`); if (currentStock > 0) setQuantity(1); return; }
-    addToCart(product, finalQuantity);
+      if(currentStock <= 0) return;
+      addToCart(product, quantity);
   };
 
-  const handleGoBackToList = () => { navigate('/#skills'); };
-
-  if (isLoadingProducts || !product) {
-    return <div className="min-h-screen flex items-center justify-center bg-black text-white text-xl">Cargando producto...</div>;
-  }
-
-  let displayUnitPrice;
-  if (product.pricingTiers && product.pricingTiers.length > 0) { const baseTier = product.pricingTiers.find(tier => tier.quantity === 1) || product.pricingTiers[0]; displayUnitPrice = baseTier.pricePerUnit; } 
-  else if (product.priceNumber) { displayUnitPrice = product.priceNumber; } 
-  else { displayUnitPrice = getNumericPrice(product.price); }
+  const handleBuyNow = () => {
+      if(currentStock <= 0) return;
+      buyNow(product, quantity);
+  };
 
   return (
-    <div className="min-h-screen bg-black text-white pt-24 md:pt-28">
-      <div className="max-w-6xl mx-auto py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
-        <button onClick={handleGoBackToList} className="mb-6 sm:mb-8 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-black bg-yellow-500 hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-yellow-500 transition-colors"> &larr; Volver a Productos </button>
-        <section className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-start mb-12 md:mb-16">
-          <div className="bg-gray-800/50 rounded-xl shadow-2xl p-4 sm:p-6 flex justify-center items-center aspect-[4/3] md:aspect-auto min-h-[300px] md:min-h-[450px]">
-            <img src={product.modelPath} alt={product.name} className="max-h-[280px] sm:max-h-[350px] md:max-h-[420px] object-contain" />
+    <div className="min-h-screen bg-black text-white pt-32 pb-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-gray-400 hover:text-yellow-500 transition-colors mb-8 group font-medium">
+            <FaArrowLeft className="group-hover:-translate-x-1 transition-transform" /> Volver a la tienda
+        </button>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-start">
+          
+          <div className="space-y-4">
+             <div className="w-full aspect-square bg-gradient-to-br from-gray-900 to-black rounded-3xl border border-white/10 flex items-center justify-center p-8 relative overflow-hidden group">
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-yellow-500/10 to-transparent opacity-50 group-hover:opacity-70 transition-opacity duration-500"></div>
+                <img src={activeImg} alt={product.name} className="w-full h-full object-contain drop-shadow-[0_20px_50px_rgba(0,0,0,0.5)] z-10 transition-transform duration-500 hover:scale-105" />
+                {product.isPromo && <span className="absolute top-6 left-6 bg-red-600 text-white font-bold px-4 py-1 rounded-full text-sm shadow-lg z-20">OFERTA ESPECIAL</span>}
+             </div>
           </div>
-          <div className="flex flex-col space-y-4 md:space-y-5">
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-yellow-300 drop-shadow-lg">{product.name}</h1>
-            <p className="text-gray-400 text-base sm:text-lg"><span className="font-semibold text-gray-200">Presentación:</span> {product.presentation}</p>
-            {typeof displayUnitPrice === 'number' && ( <p className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white my-2"> {formatMXN(displayUnitPrice)} {product.unitDescription && product.unitDescription !== "Paquete completo" && !(product.pricingTiers && product.pricingTiers.length > 0) ? ` ${product.unitDescription}` : ''} {product.pricingTiers && product.pricingTiers.length > 0 && product.unitDescription ? ` ${product.unitDescription}` : ''} </p> )}
-            {product.pricingTiers && product.pricingTiers.find(tier => tier.quantity > 1) && ( <p className="text-sm text-yellow-400 -mt-2 mb-2">Descuentos por volumen disponibles.</p> )}
-            <div className="flex items-center space-x-2 text-green-400 my-3 py-2 px-3 bg-green-500/10 rounded-md border border-green-500/30"> <FaShippingFast size={20} className="flex-shrink-0" /> <span className="font-semibold text-sm sm:text-base">¡Envío Gratis a todo México!</span> </div>
-            {currentStock <= 0 && ( <p className="text-red-500 font-bold my-2 text-lg uppercase">Producto Agotado</p> )}
-            {currentStock > 0 && currentStock <= 10 && ( <p className="text-orange-400 font-semibold my-2 text-base">¡Últimas {currentStock} unidades!</p> )}
-            <p className="text-gray-300 text-base sm:text-lg leading-relaxed">{product.description}</p>
-            {currentStock > 0 && (
-              <div className="pt-4 space-y-5">
-                <div className="flex items-center gap-3 sm:gap-4">
-                  <p className="text-gray-100 font-semibold text-base sm:text-lg">Cantidad:</p>
-                  <div className="flex items-center border border-gray-600 rounded-md">
-                    <button onClick={() => handleQuantityChangeButtons(-1)} className="px-4 py-2 text-lg sm:text-xl text-yellow-400 hover:bg-gray-700/50 rounded-l-md transition-colors" disabled={quantity <= 1 || typeof quantity !== 'number'}>-</button>
-                    <input type="number" value={inputValue} onChange={handleDirectQuantityInputChange} onBlur={handleQuantityInputBlur} min="1" max={currentStock > 0 ? currentStock : "1"} disabled={currentStock <= 0} className="w-16 sm:w-20 px-2 py-2 text-lg sm:text-xl font-semibold bg-gray-700/50 text-white text-center focus:ring-yellow-500 focus:border-yellow-500 border-y-0 border-x border-gray-600 appearance-none [-moz-appearance:textfield]" />
-                    <button onClick={() => handleQuantityChangeButtons(1)} className="px-4 py-2 text-lg sm:text-xl text-yellow-400 hover:bg-gray-700/50 rounded-r-md transition-colors" disabled={quantity >= currentStock || typeof quantity !== 'number'}>+</button>
-                  </div>
+
+          <div className="flex flex-col h-full">
+            <h2 className="text-yellow-500 font-bold uppercase tracking-widest text-sm mb-2">{product.category || 'Suplemento Natural'}</h2>
+            <h1 className="text-4xl md:text-5xl font-black text-white mb-4 leading-tight">{product.name}</h1>
+            
+            <div className="flex items-end gap-4 mb-6 border-b border-white/10 pb-6">
+                <span className="text-5xl font-bold text-yellow-400">{formatMXN(unitPrice)}</span>
+                {quantity > 1 && <span className="text-gray-400 mb-2 text-lg">x unidad</span>}
+            </div>
+
+            <div className="prose prose-invert text-gray-300 mb-8 leading-relaxed">
+                <p>{product.description}</p>
+                {product.benefits && (
+                    <ul className="mt-4 space-y-2">
+                        {product.benefits.slice(0, 4).map((benefit, i) => (
+                            <li key={i} className="flex items-center gap-3">
+                                <FaCheckCircle className="text-green-500 flex-shrink-0" /> <span>{benefit}</span>
+                            </li>
+                        ))}
+                    </ul>
+                )}
+            </div>
+
+            {currentStock > 0 ? (
+                <div className="bg-gray-900/50 p-6 rounded-2xl border border-white/10 mb-8">
+                    <div className="flex flex-col gap-4">
+                        <div className="flex flex-col sm:flex-row gap-4">
+                            <div className="flex items-center bg-black border border-gray-700 rounded-xl h-14 px-2 w-full sm:w-40 justify-between">
+                                <button onClick={() => handleQuantity(quantity - 1)} className="w-10 h-full text-2xl text-gray-400 hover:text-white flex items-center justify-center">-</button>
+                                <span className="font-bold text-xl">{quantity}</span>
+                                <button onClick={() => handleQuantity(quantity + 1)} className="w-10 h-full text-2xl text-gray-400 hover:text-white flex items-center justify-center">+</button>
+                            </div>
+                            <button 
+                                onClick={handleAddToCart}
+                                className="flex-1 bg-gray-800 hover:bg-gray-700 text-white font-bold text-lg h-14 rounded-xl border border-gray-600 transition-all flex items-center justify-center gap-3"
+                            >
+                                <FaShoppingCart /> Añadir al Carrito
+                            </button>
+                        </div>
+                        
+                        <button 
+                            onClick={handleBuyNow}
+                            className="w-full bg-yellow-500 hover:bg-yellow-400 text-black font-black text-xl h-16 rounded-xl shadow-[0_0_20px_rgba(234,179,8,0.3)] hover:shadow-[0_0_30px_rgba(234,179,8,0.5)] transition-all transform active:scale-[0.98] uppercase tracking-wide flex items-center justify-center gap-3"
+                        >
+                            <FaBolt /> COMPRAR AHORA - {formatMXN(totalPrice)}
+                        </button>
+                    </div>
+                    {currentStock < 10 && (
+                        <p className="text-orange-400 text-sm font-bold mt-3 flex items-center gap-2 animate-pulse">
+                            🔥 ¡Date prisa! Solo quedan {currentStock} unidades.
+                        </p>
+                    )}
                 </div>
-                <button onClick={handleAddToCart} disabled={currentStock <= 0 || inputValue === '' || (typeof quantity === 'number' && (quantity <= 0 || quantity > currentStock))} className="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-3.5 px-6 rounded-lg text-base sm:text-lg shadow-md hover:shadow-yellow-500/40 transition-all duration-150 transform hover:scale-105 disabled:opacity-70 disabled:cursor-not-allowed"> {currentStock > 0 ? `Añadir ${quantity || 1} al Carrito (${formatMXN(currentTotal)})` : 'Producto Agotado'} </button>
-              </div>
+            ) : (
+                <div className="bg-red-900/20 border border-red-500/50 p-6 rounded-2xl mb-8 text-center">
+                    <h3 className="text-red-500 font-bold text-2xl mb-2">PRODUCTO AGOTADO</h3>
+                    <p className="text-red-300/80">Lo sentimos, este producto se encuentra temporalmente sin stock.</p>
+                </div>
             )}
+
+            <div className="grid grid-cols-3 gap-4 mb-8">
+                <div className="flex flex-col items-center text-center p-3 bg-gray-900 rounded-xl border border-gray-800">
+                    <FaShippingFast className="text-2xl text-blue-400 mb-2" />
+                    <span className="text-xs font-bold text-gray-300">Envío Rápido</span>
+                </div>
+                <div className="flex flex-col items-center text-center p-3 bg-gray-900 rounded-xl border border-gray-800">
+                    <FaShieldAlt className="text-2xl text-green-400 mb-2" />
+                    <span className="text-xs font-bold text-gray-300">Discreción</span>
+                </div>
+                <div className="flex flex-col items-center text-center p-3 bg-gray-900 rounded-xl border border-gray-800">
+                    <FaLock className="text-2xl text-yellow-400 mb-2" />
+                    <span className="text-xs font-bold text-gray-300">Pago Seguro</span>
+                </div>
+            </div>
+
+            <a 
+                href={`https://wa.me/528123877607?text=${encodeURIComponent(`Hola, me interesa el producto ${product.name}`)}`} 
+                target="_blank" 
+                rel="noreferrer"
+                className="flex items-center justify-center gap-2 text-green-500 hover:text-green-400 transition-colors font-medium text-sm"
+            >
+                <FaWhatsapp size={18} /> ¿Tienes dudas? Consulta por WhatsApp
+            </a>
           </div>
-        </section>
-        <section className="bg-gray-800/50 p-6 sm:p-8 rounded-xl shadow-2xl mb-12 md:mb-16">
-            <h2 className="text-2xl sm:text-3xl font-bold text-yellow-300 mb-6 border-b-2 border-yellow-600/50 pb-3">Más Detalles del Producto</h2>
-            <div className="space-y-6 prose prose-sm sm:prose-base prose-invert max-w-none text-gray-300">
-                {product.detailedDescription && ( <div> <h3 className="text-xl font-semibold text-yellow-200 !mb-2">Descripción Completa</h3> <p>{product.detailedDescription}</p> </div> )}
-                {product.benefits && product.benefits.length > 0 && ( <div> <h3 className="text-xl font-semibold text-yellow-200 !mb-2">Principales Beneficios</h3> <ul className="list-disc list-inside space-y-1"> {product.benefits.map((benefit, i) => <li key={i}>{benefit}</li>)} </ul> </div> )}
-                {product.ingredients && product.ingredients.length > 0 && ( <div> <h3 className="text-xl font-semibold text-yellow-200 !mb-2">Ingredientes</h3> <ul className="list-disc list-inside space-y-1"> {product.ingredients.map((ing, i) => <li key={i}>{ing}</li>)} </ul> </div> )}
-                {product.usageInstructions && ( <div> <h3 className="text-xl font-semibold text-yellow-200 !mb-2">Modo de Uso</h3> <p className="whitespace-pre-line">{product.usageInstructions}</p> </div> )}
-                {product.warnings && product.warnings.length > 0 && ( <div className="mt-6 bg-red-900/30 border border-red-700/50 p-4 rounded-lg"> <h3 className="text-xl font-semibold text-red-300 !mb-2">Advertencias Importantes</h3> <ul className="list-disc list-inside space-y-1 text-red-200/90 text-xs sm:text-sm"> {product.warnings.map((warning, i) => <li key={i}>{warning}</li>)} </ul> </div> )}
+        </div>
+
+        {/* Detailed Information Section */}
+        <div className="mt-20 border-t border-white/10 pt-16">
+            <h3 className="text-3xl font-bold text-center mb-10 text-transparent bg-clip-text bg-gradient-to-r from-gray-100 to-gray-400">Información Detallada</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="bg-gray-900/40 p-8 rounded-2xl border border-white/5">
+                    <h4 className="text-xl font-bold text-yellow-500 mb-4">Modo de Uso</h4>
+                    <p className="text-gray-300 leading-relaxed whitespace-pre-line">{product.usageInstructions || 'Consultar el empaque para instrucciones detalladas.'}</p>
+                </div>
+                <div className="bg-gray-900/40 p-8 rounded-2xl border border-white/5">
+                    <h4 className="text-xl font-bold text-yellow-500 mb-4">Ingredientes</h4>
+                    <ul className="list-disc list-inside space-y-2 text-gray-300">
+                        {product.ingredients?.length > 0 
+                            ? product.ingredients.map((ing, idx) => <li key={idx}>{ing}</li>)
+                            : <li>Ingredientes naturales seleccionados.</li>
+                        }
+                    </ul>
+                </div>
             </div>
-        </section>
-        {recommendations.length > 0 && (
-          <section className="pt-8">
-            <h2 className="text-2xl sm:text-3xl font-bold text-yellow-300 mb-8 text-center">También te podría interesar</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-              {recommendations.map(recProduct => (
-                <Link key={recProduct.id || recProduct.name} to={`/producto/${encodeURIComponent(recProduct.id || recProduct.name)}`} className="block bg-gray-800/70 p-4 rounded-xl shadow-lg hover:shadow-yellow-500/20 border border-transparent hover:border-yellow-600/50 transition-all duration-300 group transform hover:scale-105">
-                  <div className="w-full h-48 sm:h-56 flex items-center justify-center bg-black/40 rounded-lg mb-4 overflow-hidden">
-                    <img src={recProduct.modelPath} alt={recProduct.name} className="w-full h-full object-contain p-3 transition-transform duration-300 group-hover:scale-110"/>
-                  </div>
-                  <h3 className="font-semibold text-base sm:text-lg text-yellow-200 group-hover:text-yellow-100 transition-colors truncate mb-1" title={recProduct.name}>{recProduct.name}</h3>
-                  { (recProduct.price || recProduct.priceNumber || (recProduct.pricingTiers && recProduct.pricingTiers[0])) &&
-                    <p className="text-lg sm:text-xl font-bold text-white">{formatMXN(getNumericPrice(recProduct.pricingTiers || recProduct.priceNumber || recProduct.price, 1))}</p>
-                  }
-                  {recProduct.stock !== undefined && recProduct.stock <= 0 && <p className="text-xs text-red-500 mt-1 font-semibold">AGOTADO</p>}
-                </Link>
-              ))}
-            </div>
-          </section>
-        )}
+        </div>
+
       </div>
     </div>
   );

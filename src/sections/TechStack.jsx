@@ -10,12 +10,14 @@ gsap.registerPlugin(ScrollTrigger);
 const TechStack = () => {
   const { allProductsWithStock, isLoadingProducts } = useCart();
 
-  const individualProducts = allProductsWithStock.filter(p => p.id && p.category === "Productos Individuales");
-  const promos = allProductsWithStock.filter(p => p.id && p.category === "Promociones");
-  const wholesaleOffers = allProductsWithStock.filter(p => p.id && p.category === "Mayoreo");
+  const availableProducts = allProductsWithStock.filter(p => p.stock > 0);
+
+  const fatherDayPromosView = availableProducts.filter(p => p.id && p.category === "Promociones Papá");
+  const regularProductsView = availableProducts.filter(p => p.id && p.category === "Productos Individuales");
+  const offersView = availableProducts.filter(p => p.id && p.category === "Mayoreo");
 
   useEffect(() => {
-    if (!isLoadingProducts && allProductsWithStock.length > 0) {
+    if (!isLoadingProducts && availableProducts.length > 0) {
       const cardsToAnimate = gsap.utils.toArray(".tech-card");
       if (cardsToAnimate.length > 0) {
         gsap.fromTo(cardsToAnimate, { opacity: 0, y: -20 }, { 
@@ -28,7 +30,7 @@ const TechStack = () => {
         gsap.killTweensOf(".tech-card");
       };
     }
-  }, [isLoadingProducts, allProductsWithStock]);
+  }, [isLoadingProducts, availableProducts]);
 
   if (isLoadingProducts) {
     return <div className="min-h-screen flex items-center justify-center bg-black text-white text-xl">Cargando productos...</div>;
@@ -47,12 +49,14 @@ const TechStack = () => {
           </section>
         )}
 
-        <section id="skills" className="mb-16 md:mb-20 pt-10">
-            <TitleHeader title="🔥 ¡Potencia tu Deseo!" sub="Elige el producto ideal para llevar tu energía al máximo."/>
-            <div className="grid md:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-6 md:gap-9 mt-12">
-              {individualProducts.map(item => <ProductCard key={item.id} item={item} />)}
-            </div>
-        </section>
+        {regularProductsView.length > 0 && (
+            <section id="skills" className="mb-16 md:mb-20 pt-10">
+                <TitleHeader title="🔥 ¡Potencia tu Deseo!" sub="Elige el paquete ideal para llevar tu energía al máximo."/>
+                <div className="grid md:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-6 md:gap-9 mt-12">
+                {regularProductsView.map(item => <ProductCard key={item.id} item={item} />)}
+                </div>
+            </section>
+        )}
 
         {wholesaleOffers.length > 0 && (
             <section id="ofertas-mayoreo" className="mt-16 md:mt-20 pt-10">
@@ -61,6 +65,12 @@ const TechStack = () => {
                 {wholesaleOffers.map(item => <ProductCard key={item.id} item={item} />)}
               </div>
             </section>
+        )}
+
+        {availableProducts.length === 0 && (
+            <div className="text-center py-20">
+                <p className="text-gray-500 text-lg">Por el momento no tenemos stock disponible. ¡Vuelve pronto!</p>
+            </div>
         )}
       </div>
     </div>
