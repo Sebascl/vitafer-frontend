@@ -1,11 +1,11 @@
 import React from 'react';
 import { FaFire, FaGem, FaInfinity, FaHeart, FaFeatherAlt } from 'react-icons/fa';
-import { IoSparklesOutline } from 'react-icons/io5';
+import { IoSparklesOutline, IoPulseOutline } from 'react-icons/io5';
 
 const navLinks = [
-  { name: "Inicio", link: "/" },
-  { name: "Tienda", link: "/tienda" },
-  { name: "Información", link: "/informacion" },
+  { id: 1, name: "TIENDA", link: "/" },
+  { id: 2, name: "NOSOTROS", link: "/nosotros" },
+  { id: 3, name: "INFORMACIÓN", link: "/informacion" },
 ];
 
 const words = [
@@ -22,6 +22,34 @@ const counterItems = [
   { value: 200000, suffix: "+", label: "Clientes Satisfechos" },
   { value: 10000, suffix: "+", label: "Testimonios Positivos" },
   { value: 100, suffix: "%", label: "Ingredientes Naturales" },
+];
+
+const logoIconsList = [
+  { imgPath: "/images/logos/company-logo-1.png" },
+  { imgPath: "/images/logos/company-logo-2.png" },
+  { imgPath: "/images/logos/company-logo-3.png" },
+  { imgPath: "/images/logos/company-logo-4.png" },
+  { imgPath: "/images/logos/company-logo-5.png" },
+  { imgPath: "/images/logos/company-logo-6.png" },
+  { imgPath: "/images/logos/company-logo-7.png" },
+  { imgPath: "/images/logos/company-logo-8.png" },
+  { imgPath: "/images/logos/company-logo-9.png" },
+  { imgPath: "/images/logos/company-logo-10.png" },
+  { imgPath: "/images/logos/company-logo-11.png" },
+];
+
+const abilities = [
+  { imgPath: "/images/seo.png", title: "Calidad Premium", desc: "Garantizamos resultados de alta calidad manteniendo la atención en cada detalle de nuestra fórmula." },
+  { imgPath: "/images/chat.png", title: "Soporte Confiable", desc: "Estamos disponibles para resolver tus dudas y asegurar una experiencia de compra transparente y clara." },
+  { imgPath: "/images/time.png", title: "Envíos Rápidos", desc: "Aseguramos que tus pedidos lleguen a tiempo, con total discreción y cuidado en el empaque." },
+];
+
+const techStackImgs = [
+  { name: "React Developer", imgPath: "/images/logos/react.png" },
+  { name: "Python Developer", imgPath: "/images/logos/python.svg" },
+  { name: "Backend Developer", imgPath: "/images/logos/node.png" },
+  { name: "Interactive Developer", imgPath: "/images/logos/three.png" },
+  { name: "Project Manager", imgPath: "/images/logos/git.svg" },
 ];
 
 const commonIngredients = [
@@ -61,7 +89,7 @@ const commonWarnings = [
   "Si padece alguna condición médica preexistente (especialmente cardíaca, hipertensión, diabetes, problemas hepáticos o renales) o si está tomando medicamentos, consulte a su médico antes de consumir este producto.",
   "Consérvese en su envase original, en un lugar fresco y seco, a una temperatura inferior a 30°C y protegido de la luz directa del sol.",
   "Descontinúe su uso y consulte a un médico si experimenta alguna reacción adversa o efectos secundarios inesperados.",
-  "MUY IMPORTANTE: Algunas autoridades sanitarias han emitido alertas sobre ciertas versiones de productos con nombres similares o que contienen 'Vitafer', por la posible presencia de ingredientes farmacéuticos no declarados. Adquiera el producto de fuentes confiables, verifique la regulación local en México y consuma con responsabilidad."
+  "MUY IMPORTANTE: Algunas autoridades sanitarias han emitido alertas sobre ciertas versiones de productos con nombres similares o que contienen 'Vitafer', por la posible presencia de ingredientes farmacéuticos no declarados (como Tadalafilo, usado para la disfunción eréctil). Adquiera el producto de fuentes confiables, verifique la regulación local en México y consuma con responsabilidad. La presencia de dichos ingredientes no declarados puede suponer un riesgo para la salud."
 ];
 
 const vitaferProducts = [
@@ -70,13 +98,13 @@ const vitaferProducts = [
     name: "💥 Vitafer-L 500mL (1 Frasco)",
     modelPath: "/images/vitafer-bottle.png",
     price: "$ 1000",
-    originalPrice: "$ 1050",
+    originalPrice: "$ 1000",
     isPromo: true,
     presentation: "Frasco de 500 mL",
-    description: "El clásico multivitamínico que enciende tu energía. Ideal para el rendimiento diario y la resistencia.",
+    description: "El clásico multivitamínico que enciende tu energía. Ideal para el rendimiento diario y la resistencia. 💪🔥",
     detailedDescription: "Vitafer-L en su presentación de 500mL es la fórmula tradicional y robusta diseñada para quienes buscan un tratamiento continuo. Al tomarlo diariamente, potencias tu vitalidad, mejoras tu desempeño físico y sexual, y combates la fatiga acumulada de manera efectiva y natural.",
     ingredients: commonIngredients,
-    usageInstructions: "Adultos: Tomar una (1) copa dosificadora (10ml) al día, preferiblemente con una de las comidas principales. Para un efecto más inmediato antes de la actividad física o sexual, se puede tomar 30-45 minutos antes.",
+    usageInstructions: "Adultos: Tomar una (1) copa dosificadora (10ml) al día, preferiblemente con una de las comidas principales. Para un efecto más inmediato antes de la actividad física, se puede tomar 30-45 minutos antes.",
     benefits: commonBenefits,
     warnings: commonWarnings,
     category: "Productos Individuales",
@@ -113,12 +141,29 @@ const vitaferProducts = [
     sku: "VTFL500ML-X3"
   },
   {
+    id: "vitafer-l-sachet-x3-promo",
+    name: "🔥 Promo: 3 Sachets Vitafer-L",
+    modelPath: "/images/sachetsx3.png",
+    price: "$ 1.900",
+    originalPrice: "$ 2.700",
+    isPromo: true,
+    presentation: "Pack de 3 Sobres de 10mL c/u",
+    description: "¡El combo perfecto! 3 dosis de potencia portátil con un precio irresistible.",
+    detailedDescription: "Disfruta de la libertad y la potencia con este pack de 3 sachets. Ideal para un fin de semana largo o para tener siempre una reserva a mano. La misma fórmula efectiva en su presentación más práctica, ahora con un descuento especial.",
+    ingredients: commonIngredients,
+    usageInstructions: "Adultos: Consumir el contenido completo de un sachet (10ml) directamente, 30 a 60 minutos antes de la actividad.",
+    benefits: commonBenefits,
+    warnings: commonWarnings,
+    category: "Productos Individuales",
+    sku: "VTFLSACH-PACK3"
+  },
+  {
     id: "vitafer-l-sachet-10ml",
     name: "🔥 Vitafer-L Sachet 10mL",
     modelPath: "/images/sachet.png",
     price: "$ 900",
     originalPrice: "$ 950",
-    isPromo: true,
+    isPromo: false,
     presentation: "Display x 15 sobres de 10mL c/u",
     description: "Potencia en formato práctico. Llévalo contigo a donde vayas de forma discreta.",
     detailedDescription: "La presentación en sachet de Vitafer-L es perfecta para la portabilidad y la discreción. Cada sobre contiene la dosis exacta para un efecto potente inmediato. Ideal para viajes, salidas de fin de semana o para tener siempre a mano en el momento justo.",
@@ -304,6 +349,12 @@ const expCards2 = [
   },
 ];
 
+const expLogos = [
+  { name: "logo1", imgPath: "/images/logo1.png" },
+  { name: "logo2", imgPath: "/images/logo2.png" },
+  { name: "logo3", imgPath: "/images/logo3.png" },
+];
+
 const testimonials = [
   {
     name: "Carlos Gómez",
@@ -351,14 +402,17 @@ const socialImgs = [
 
 export {
   words,
+  abilities,
+  logoIconsList,
   counterItems,
-  navLinks,
-  commonIngredients,
-  vitaferProducts,
-  vitaferOffers,
-  fatherDayPromos,
   expCards,
   expCards2,
+  expLogos,
   testimonials,
   socialImgs,
+  vitaferProducts,
+  vitaferOffers,
+  techStackImgs,
+  navLinks,
+  fatherDayPromos
 };
