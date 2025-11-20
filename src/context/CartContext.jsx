@@ -7,13 +7,11 @@ const CartContext = createContext();
 export const useCart = () => useContext(CartContext);
 
 export const CartProvider = ({ children }) => {
-  // Inicializar carrito desde Cookies
   const [cartItems, setCartItems] = useState(() => {
     const storedCart = Cookies.get('cartItems');
     try { 
       return storedCart ? JSON.parse(storedCart) : []; 
     } catch (e) { 
-      console.error("Error parsing cart from cookies", e); 
       return []; 
     }
   });
@@ -21,13 +19,11 @@ export const CartProvider = ({ children }) => {
   const [notification, setNotification] = useState('');
   const [isCartOpen, setIsCartOpen] = useState(false);
   
-  // Estado del despachador (Admin)
   const [dispatcher, setDispatcher] = useState(() => {
     try { 
       const storedDispatcher = localStorage.getItem('dispatcher'); 
       return storedDispatcher ? JSON.parse(storedDispatcher) : null; 
     } catch (e) { 
-      console.error("Error parsing dispatcher from localStorage", e); 
       return null; 
     }
   });
@@ -35,13 +31,10 @@ export const CartProvider = ({ children }) => {
   const [allProductsWithStock, setAllProductsWithStock] = useState([]);
   const [isLoadingProducts, setIsLoadingProducts] = useState(true);
   
-  // URL del Backend
   const backendApiUrl = import.meta.env.VITE_BACKEND_API_URL;
 
-  // --- Lógica de Stock y Precios ---
   const fetchStockAndMergeProducts = useCallback(async () => {
     setIsLoadingProducts(true);
-    // Unimos los productos base y las ofertas del archivo constants
     const localProductData = [...baseVitaferProducts, ...baseVitaferOffers];
     const productIds = localProductData.map(p => p.id).filter(Boolean);
 
@@ -52,41 +45,37 @@ export const CartProvider = ({ children }) => {
     }
 
     if (!backendApiUrl) {
-      console.warn("VITE_BACKEND_API_URL no configurada. Usando stock 0.");
       setAllProductsWithStock(localProductData.map(p => ({ ...p, stock: 0 })));
       setIsLoadingProducts(false);
       return;
     }
 
     try {
-      // Pedimos stock y precios actualizados al backend
       const response = await fetch(`${backendApiUrl}/api/products/data`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ productIds }),
       });
 
-      if (!response.ok) {
-        throw new Error('Error fetching product data');
-      }
+      if (!response.ok) throw new Error('Error fetching product data');
 
       const dataMap = await response.json();
 
-      // Fusionamos la info estática con la info del servidor
       const mergedProducts = localProductData.map(p => {
          const dbData = dataMap[p.id];
+         const hasDbPrice = dbData?.price !== undefined && dbData?.price !== null;
+
          return {
              ...p,
              stock: dbData?.stock !== undefined ? dbData.stock : 0,
-             // Si el backend tiene precio, lo usamos (convirtiéndolo a string para consistencia), si no, usamos el local
-             price: dbData?.price !== undefined ? dbData.price.toString() : p.price, 
+             price: hasDbPrice ? dbData.price.toString() : p.price, 
+             pricingTiers: hasDbPrice ? null : p.pricingTiers
          };
       });
       setAllProductsWithStock(mergedProducts);
 
     } catch (error) {
-      console.error("Error cargando datos de productos:", error);
-      // Fallback seguro
+      console.error("Error cargando datos:", error);
       setAllProductsWithStock(localProductData.map(p => ({ ...p, stock: 0 })));
     } finally {
       setIsLoadingProducts(false);
@@ -97,7 +86,6 @@ export const CartProvider = ({ children }) => {
     fetchStockAndMergeProducts();
   }, [fetchStockAndMergeProducts]);
 
-  // --- Efectos Secundarios ---
   useEffect(() => { 
     if (notification) { 
       const timer = setTimeout(() => setNotification(''), 3000); 
@@ -106,33 +94,28 @@ export const CartProvider = ({ children }) => {
   }, [notification]);
 
   useEffect(() => { 
-    try { 
-      Cookies.set('cartItems', JSON.stringify(cartItems), { expires: 7 }); 
-    } catch (e) { 
-      console.error("Error saving cart to cookies", e); 
-    } 
+    try { Cookies.set('cartItems', JSON.stringify(cartItems), { expires: 7 }); } catch (e) {} 
   }, [cartItems]);
 
   useEffect(() => { 
     try { 
-      if (dispatcher) { 
-        localStorage.setItem('dispatcher', JSON.stringify(dispatcher)); 
-      } else { 
-        localStorage.removeItem('dispatcher'); 
-      } 
-    } catch (e) { 
-      console.error("Error saving dispatcher to localStorage", e); 
-    } 
+      if (dispatcher) localStorage.setItem('dispatcher', JSON.stringify(dispatcher)); 
+      else localStorage.removeItem('dispatcher'); 
+    } catch (e) {} 
   }, [dispatcher]);
 
-  // --- Helpers de Precio ---
   const getNumericPrice = useCallback((priceData, quantity = 1) => {
+    if (!priceData) return 0;
+
     if (typeof priceData === 'number') return priceData; 
+    
     if (typeof priceData === 'string') {
       try { 
         return parseFloat(priceData.replace(/[^0-9.-]+/g, "").replace('.', '')); 
       } catch (e) { return 0; }
-    } else if (Array.isArray(priceData) && priceData.length > 0) {
+    } 
+    
+    if (Array.isArray(priceData) && priceData.length > 0) {
       let applicableTier = priceData[0];
       for (let i = priceData.length - 1; i >= 0; i--) { 
         if (quantity >= priceData[i].quantity) { 
@@ -149,7 +132,6 @@ export const CartProvider = ({ children }) => {
     typeof value === 'number' ? value.toLocaleString('es-MX', { style: 'currency', currency: 'MXN', minimumFractionDigits: 0 }) : '$0', 
   []);
 
-  // --- Acciones del Carrito ---
   const addToCart = useCallback((productToAdd, quantityToAdd = 1) => {
       const productWithStock = allProductsWithStock.find(p => p.id === productToAdd.id);
 
@@ -163,9 +145,11 @@ export const CartProvider = ({ children }) => {
         const currentCartQuantity = existingItem ? existingItem.quantity : 0;
 
         if (productWithStock.stock < currentCartQuantity + quantityToAdd) {
-          setNotification(`Stock insuficiente. Disponible: ${productWithStock.stock}.`);
+          setNotification(`Stock insuficiente.`);
           return prevItems;
         }
+
+        const priceToUse = productWithStock.pricingTiers || productWithStock.price;
 
         if (existingItem) {
           return prevItems.map(item =>
@@ -178,14 +162,14 @@ export const CartProvider = ({ children }) => {
             ...productToAdd, 
             quantity: quantityToAdd, 
             currentStockSnapshot: productWithStock.stock, 
-            price: productWithStock.price // Guardamos el precio actualizado
+            price: productWithStock.price,
+            pricingTiers: productWithStock.pricingTiers 
           }];
         }
       });
       setNotification(`${productToAdd.name} añadido!`);
   }, [allProductsWithStock, setNotification]);
 
-  // Función Compra Inmediata
   const buyNow = useCallback((product, quantity) => {
       addToCart(product, quantity);
       setIsCartOpen(true);
@@ -222,12 +206,8 @@ export const CartProvider = ({ children }) => {
 
   const clearCart = useCallback(() => { setCartItems([]); }, []);
 
-  // --- Autenticación Dispatcher ---
   const loginDispatcher = useCallback(async (username, password) => {
-    if (!backendApiUrl) { 
-      console.error("VITE_BACKEND_API_URL no configurada."); 
-      throw new Error("Error de configuración"); 
-    }
+    if (!backendApiUrl) throw new Error("Error de configuración");
     try {
       const response = await fetch(`${backendApiUrl}/api/auth/dispatcher/login`, { 
         method: 'POST', 
@@ -239,7 +219,6 @@ export const CartProvider = ({ children }) => {
       setDispatcher(data.user);
       return data;
     } catch (error) { 
-      console.error("Error en loginDispatcher:", error); 
       setDispatcher(null); 
       throw error; 
     }
@@ -257,9 +236,10 @@ export const CartProvider = ({ children }) => {
     cartTotal: cartItems.reduce((total, item) => {
       const productData = allProductsWithStock.find(p => p.id === item.id);
       if (!productData) return total;
-      // Usamos el precio actualizado del backend si existe
-      const priceToUse = productData.price || item.price;
-      const pricePerUnit = getNumericPrice(priceToUse, item.quantity);
+      
+      const priceStructure = productData.pricingTiers || productData.price;
+      const pricePerUnit = getNumericPrice(priceStructure, item.quantity);
+      
       return total + (pricePerUnit * item.quantity);
     }, 0),
     getNumericPrice, 
