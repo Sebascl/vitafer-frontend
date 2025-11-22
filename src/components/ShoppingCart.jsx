@@ -20,8 +20,7 @@ const ShoppingCart = () => {
 
   const handleProceedToCheckout = () => {
       if (!user) {
-          handleClose();
-          // CAMBIO: Enviamos 'openCart: true' junto con la ruta de origen
+          setIsCartOpen(false);
           navigate('/login', { state: { from: location.pathname, openCart: true } });
       } else {
           setShowCheckout(true);
@@ -38,6 +37,7 @@ const ShoppingCart = () => {
         onClick={(e) => e.stopPropagation()} 
       >
         
+        {/* Header */}
         <div className="p-6 flex justify-between items-center border-b border-white/10 bg-black/40">
             <h2 className="text-2xl font-black text-white flex items-center gap-3 uppercase tracking-wide">
                 <FaShoppingCart className="text-yellow-500"/> 
@@ -48,6 +48,7 @@ const ShoppingCart = () => {
             </button>
         </div>
 
+        {/* Content */}
         <div className="flex-grow overflow-y-auto p-6 custom-scrollbar bg-zinc-950">
             {showCheckout && user ? (
                 <>
@@ -106,6 +107,7 @@ const ShoppingCart = () => {
             )}
         </div>
 
+        {/* Footer */}
         {!showCheckout && cartItems.length > 0 && (
             <div className="p-6 border-t border-white/10 bg-black/40 backdrop-blur-lg">
                 <div className="flex justify-between items-end mb-6">

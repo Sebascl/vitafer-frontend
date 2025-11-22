@@ -24,7 +24,6 @@ const RegisterPage = () => {
       const origin = location.state?.from || '/mi-perfil';
       const shouldOpenCart = location.state?.openCart || false;
 
-      // CAMBIO: Pasamos el estado openCart de nuevo
       navigate(origin, { replace: true, state: { openCart: shouldOpenCart } });
 
     } catch (err) {

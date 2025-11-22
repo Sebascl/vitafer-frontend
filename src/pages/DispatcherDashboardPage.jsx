@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
-import { FaTrash, FaEye, FaUserPlus, FaSave, FaTimes, FaShippingFast, FaUndo } from 'react-icons/fa';
+import { FaTrash, FaEye, FaUserPlus, FaSave, FaTimes, FaShippingFast, FaUndo, FaMoneyBillWave } from 'react-icons/fa';
 
 const DispatcherDashboardPage = () => {
   const [pendingOrders, setPendingOrders] = useState([]);
@@ -112,6 +112,23 @@ const DispatcherDashboardPage = () => {
       } catch (err) { console.error(err); }
   };
 
+  const handleManualPurchase = async (userId) => {
+      const amount = prompt("Ingrese el monto de la compra (MXN):");
+      if (!amount) return;
+      try {
+          const res = await fetch(`${backendApiUrl}/api/dispatcher/user/${userId}/manual-purchase`, {
+              method: 'POST', headers: {'Content-Type': 'application/json'},
+              body: JSON.stringify({ amount })
+          });
+          if(!res.ok) throw new Error('Error');
+          const data = await res.json();
+          alert(`Compra registrada. Se añadieron ${data.addedSpins} giros. Saldo restante: ${formatMXN(data.newProgress)}`);
+          fetchUsers();
+      } catch (error) {
+          alert("Error al registrar compra.");
+      }
+  };
+
   const handleViewUserDetails = async (userId) => {
       try {
           const res = await fetch(`${backendApiUrl}/api/dispatcher/user/${userId}/details`);
@@ -120,6 +137,22 @@ const DispatcherDashboardPage = () => {
           setSelectedUser(data);
           setShowUserModal(true);
       } catch (err) { alert(err.message); }
+  };
+
+  const handleDispatchPrize = async (userId, prizeId) => {
+      if(!confirm("¿Marcar este premio como entregado?")) return;
+      try {
+          const res = await fetch(`${backendApiUrl}/api/dispatcher/user/${userId}/prize/${prizeId}/dispatch`, {
+              method: 'PUT', headers: { 'Content-Type': 'application/json' }
+          });
+          if (!res.ok) throw new Error('Error al actualizar');
+          
+          // Actualizar la vista del modal inmediatamente
+          const updatedUserRes = await fetch(`${backendApiUrl}/api/dispatcher/user/${userId}/details`);
+          const updatedUserData = await updatedUserRes.json();
+          setSelectedUser(updatedUserData);
+          
+      } catch (error) { alert(error.message); }
   };
 
   const handleInventoryChange = (productId, field, value) => {
@@ -159,10 +192,8 @@ const DispatcherDashboardPage = () => {
     } catch (err) { console.error(err); }
   };
 
-  // --- FUNCIÓN RENDER DE TARJETA RESTAURADA Y MEJORADA ---
   const renderOrderCard = (order, isPending) => (
     <div key={order._id} className="bg-gray-800 p-6 rounded-xl border border-gray-700 shadow-lg flex flex-col h-full">
-      {/* Encabezado: ID y Fecha */}
       <div className="flex justify-between items-start mb-4 border-b border-gray-700 pb-3">
          <div>
             <h2 className="text-xl font-bold text-yellow-400">Orden #{order._id.slice(-6)}</h2>
@@ -175,8 +206,6 @@ const DispatcherDashboardPage = () => {
       </div>
 
       <div className="flex-grow space-y-4 text-sm text-gray-300">
-         
-         {/* Vendedor / Referido */}
          {(order.referredByEmployeeInfo?.name || order.referralCode) && (
              <div className="bg-gray-900/50 p-2 rounded border-l-4 border-green-500">
                  <h4 className="font-bold text-gray-200 text-xs uppercase">Vendido por:</h4>
@@ -184,7 +213,6 @@ const DispatcherDashboardPage = () => {
              </div>
          )}
 
-         {/* Cliente */}
          <div>
             <h4 className="font-bold text-gray-200 mb-1 text-xs uppercase">Cliente:</h4>
             <div className="flex items-center gap-2">
@@ -199,7 +227,6 @@ const DispatcherDashboardPage = () => {
             <p className="text-gray-400">{order.customerDetails.phone}</p>
          </div>
 
-         {/* Dirección */}
          <div className="bg-black/20 p-3 rounded">
             <h4 className="font-bold text-gray-200 mb-1 text-xs uppercase">Dirección de Envío:</h4>
             <p className="text-gray-300 break-words">{order.customerDetails.address}</p>
@@ -213,7 +240,6 @@ const DispatcherDashboardPage = () => {
             )}
          </div>
 
-         {/* Productos */}
          <div>
             <h4 className="font-bold text-gray-200 mb-2 text-xs uppercase border-b border-gray-700 pb-1">Productos:</h4>
             <ul className="space-y-2">
@@ -230,20 +256,13 @@ const DispatcherDashboardPage = () => {
          </div>
       </div>
 
-      {/* Botones de Acción */}
       <div className="mt-6 pt-4 border-t border-gray-700">
         {isPending ? (
-            <button 
-                onClick={() => handleMarkAsShipped(order._id)} 
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition-colors flex items-center justify-center gap-2"
-            >
+            <button onClick={() => handleMarkAsShipped(order._id)} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition-colors flex items-center justify-center gap-2">
                 <FaShippingFast /> Marcar Despachado
             </button>
         ) : (
-            <button 
-                onClick={() => handleUnshipOrder(order._id)} 
-                className="w-full bg-gray-700 hover:bg-red-700 text-white font-bold py-3 rounded-lg transition-colors flex items-center justify-center gap-2"
-            >
+            <button onClick={() => handleUnshipOrder(order._id)} className="w-full bg-gray-700 hover:bg-red-700 text-white font-bold py-3 rounded-lg transition-colors flex items-center justify-center gap-2">
                 <FaUndo /> Revertir Despacho
             </button>
         )}
@@ -254,7 +273,8 @@ const DispatcherDashboardPage = () => {
   if (!dispatcher) return null;
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white p-4 sm:p-6">
+    // CAMBIO AQUÍ: Agregado pt-28 md:pt-32 para compensar el Navbar fijo
+    <div className="min-h-screen bg-gray-900 text-white px-4 sm:px-6 pb-10 pt-28 md:pt-32">
       <div className="max-w-7xl mx-auto">
         <div className="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
           <h1 className="text-3xl font-bold text-white">Panel de Control</h1>
@@ -294,6 +314,7 @@ const DispatcherDashboardPage = () => {
                           <tr>
                               <th className="p-4 font-semibold">Nombre</th>
                               <th className="p-4 font-semibold">Email / Teléfono</th>
+                              <th className="p-4 font-semibold text-center">Saldo Acumulado</th>
                               <th className="p-4 font-semibold text-center">Giros Ruleta</th>
                               <th className="p-4 font-semibold text-right">Acciones</th>
                           </tr>
@@ -308,6 +329,9 @@ const DispatcherDashboardPage = () => {
                                           <span className="text-gray-500 text-xs">{u.phone}</span>
                                       </div>
                                   </td>
+                                  <td className="p-4 text-center font-bold text-green-400">
+                                      {formatMXN(u.progressAmount || 0)}
+                                  </td>
                                   <td className="p-4">
                                       <div className="flex items-center justify-center gap-2">
                                           <input 
@@ -321,8 +345,9 @@ const DispatcherDashboardPage = () => {
                                   </td>
                                   <td className="p-4">
                                       <div className="flex justify-end gap-3">
+                                          <button onClick={() => handleManualPurchase(u._id)} className="text-green-400 hover:text-green-300 p-2 rounded hover:bg-green-400/10 transition-colors" title="Registrar Compra (WhatsApp)"><FaMoneyBillWave/></button>
                                           <button onClick={() => handleViewUserDetails(u._id)} className="text-yellow-400 hover:text-yellow-300 p-2 rounded hover:bg-yellow-400/10 transition-colors" title="Ver Detalles"><FaEye/></button>
-                                          <button onClick={() => handleDeleteUser(u._id)} className="text-red-400 hover:text-red-300 p-2 rounded hover:bg-red-400/10 transition-colors" title="Eliminar"><FaTrash/></button>
+                                          {/* <button onClick={() => handleDeleteUser(u._id)} className="text-red-400 hover:text-red-300 p-2 rounded hover:bg-red-400/10 transition-colors" title="Eliminar"><FaTrash/></button> */}
                                       </div>
                                   </td>
                               </tr>
@@ -365,7 +390,6 @@ const DispatcherDashboardPage = () => {
           </div>
         )}
 
-        {/* Modal Create User */}
         {showCreateUserModal && (
             <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
                 <div className="bg-gray-800 p-6 rounded-xl max-w-md w-full border border-gray-700 shadow-2xl">
@@ -402,7 +426,6 @@ const DispatcherDashboardPage = () => {
             </div>
         )}
 
-        {/* Modal User Details */}
         {showUserModal && selectedUser && (
             <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
                 <div className="bg-gray-800 p-8 rounded-xl max-w-3xl w-full border border-gray-700 relative max-h-[90vh] overflow-y-auto shadow-2xl">
@@ -425,14 +448,30 @@ const DispatcherDashboardPage = () => {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div>
-                            <h3 className="text-lg font-bold text-blue-400 mb-4 flex items-center gap-2"><span className="text-xl">🏆</span> Historial de Premios</h3>
-                            <div className="bg-gray-900 p-4 rounded-lg h-64 overflow-y-auto border border-gray-700">
+                            <h3 className="text-lg font-bold text-blue-400 mb-3">Historial de Premios</h3>
+                            <div className="bg-gray-900 p-4 rounded-lg max-h-60 overflow-y-auto border border-gray-700">
                                 {selectedUser.user.prizes && selectedUser.user.prizes.length > 0 ? (
                                     <ul className="space-y-3">
                                         {selectedUser.user.prizes.map((p, i) => (
-                                            <li key={i} className="flex justify-between items-center bg-gray-800 p-2 rounded border border-gray-700">
-                                                <span className="text-yellow-200 font-medium">{p.name}</span>
-                                                <span className="text-gray-500 text-xs bg-black/30 px-2 py-1 rounded">{new Date(p.date).toLocaleDateString()}</span>
+                                            <li key={i} className="flex flex-col bg-black/30 p-3 rounded border border-gray-700">
+                                                <div className="flex justify-between items-center mb-1">
+                                                    <span className="text-yellow-200 font-medium">{p.name}</span>
+                                                    <span className="text-gray-500 text-xs">{new Date(p.date).toLocaleDateString()}</span>
+                                                </div>
+                                                <div className="flex justify-between items-center mt-2">
+                                                    <span className={`text-xs font-bold px-2 py-0.5 rounded uppercase ${p.status === 'shipped' ? 'bg-blue-900 text-blue-300' : 'bg-orange-900 text-orange-300'}`}>
+                                                        {p.status === 'shipped' ? 'Entregado' : 'Pendiente'}
+                                                    </span>
+                                                    
+                                                    {p.status !== 'shipped' && (
+                                                        <button 
+                                                            onClick={() => handleDispatchPrize(selectedUser.user._id, p._id)}
+                                                            className="bg-green-600 hover:bg-green-500 text-white text-xs font-bold px-3 py-1 rounded transition-colors"
+                                                        >
+                                                            Marcar Enviado
+                                                        </button>
+                                                    )}
+                                                </div>
                                             </li>
                                         ))}
                                     </ul>

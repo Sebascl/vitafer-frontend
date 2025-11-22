@@ -97,6 +97,12 @@ const UserDashboardPage = () => {
     }
   };
 
+  // Cálculo para la barra de progreso
+  const nextSpinAmount = 500;
+  const currentProgress = user?.progressAmount || 0;
+  const progressPercentage = Math.min((currentProgress / nextSpinAmount) * 100, 100);
+  const remaining = nextSpinAmount - currentProgress;
+
   return (
     <div className="min-h-screen bg-black text-white pt-28 pb-10 px-4">
       <div className="max-w-6xl mx-auto">
@@ -105,10 +111,14 @@ const UserDashboardPage = () => {
             <h1 className="text-3xl font-bold text-yellow-400">Hola, {user?.name}</h1>
             <p className="text-gray-400">{user?.email}</p>
           </div>
-          <div className="bg-gray-800 px-6 py-3 rounded-lg text-center border border-yellow-500/30 shadow-[0_0_15px_rgba(234,179,8,0.2)]">
+          <div className="bg-gray-800 px-6 py-3 rounded-lg text-center border border-yellow-500/30 shadow-[0_0_15px_rgba(234,179,8,0.2)] w-full md:w-auto">
              <p className="text-gray-300 text-sm uppercase tracking-wider">Giros Disponibles</p>
              <p className="text-4xl font-black text-yellow-400">{user?.spins || 0}</p>
-             <p className="text-[10px] text-gray-500">1 Giro por cada $500 de compra</p>
+             
+             <div className="mt-2 w-full bg-gray-700 rounded-full h-2.5 dark:bg-gray-700">
+                <div className="bg-yellow-400 h-2.5 rounded-full transition-all duration-500" style={{ width: `${progressPercentage}%` }}></div>
+             </div>
+             <p className="text-[10px] text-gray-400 mt-1">Te faltan ${remaining} para el próximo giro</p>
           </div>
         </div>
 
@@ -234,7 +244,9 @@ const UserDashboardPage = () => {
                                  <div>
                                      <p className="font-bold text-yellow-200 text-lg">{prize.name}</p>
                                      <p className="text-xs text-gray-500 mt-1">{new Date(prize.date).toLocaleDateString()}</p>
-                                     <span className="inline-block mt-2 text-[10px] font-bold uppercase bg-green-900/50 text-green-400 px-2 py-0.5 rounded border border-green-900">Pendiente de envío</span>
+                                     <span className={`inline-block mt-2 text-[10px] font-bold uppercase px-2 py-0.5 rounded border ${prize.status === 'shipped' ? 'bg-blue-900/50 text-blue-400 border-blue-900' : 'bg-green-900/50 text-green-400 border-green-900'}`}>
+                                         {prize.status === 'shipped' ? 'Enviado' : 'Pendiente de envío'}
+                                     </span>
                                  </div>
                              </div>
                          ))}

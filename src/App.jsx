@@ -45,11 +45,14 @@ function AppContent() {
   }, [pathname]);
 
   useEffect(() => {
-      if (location.state?.openCart) {
+      if (location.state?.openCart && !['/login', '/registro'].includes(pathname)) {
           setIsCartOpen(true);
           window.history.replaceState({}, document.title); 
       }
-  }, [location, setIsCartOpen]);
+      if (['/login', '/registro'].includes(pathname)) {
+          setIsCartOpen(false);
+      }
+  }, [location, setIsCartOpen, pathname]);
 
   useEffect(() => {
     const queryParams = new URLSearchParams(window.location.search);

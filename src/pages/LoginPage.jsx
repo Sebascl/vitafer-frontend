@@ -71,7 +71,7 @@ const LoginPage = () => {
           </div>
 
           <button className="w-full mt-2 bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-400 hover:to-yellow-500 text-black font-bold py-3 rounded-lg shadow-lg shadow-yellow-500/20 transform transition-all active:scale-95">
-            INGRESAR
+            INGRESAR Y CONTINUAR
           </button>
         </form>
 
